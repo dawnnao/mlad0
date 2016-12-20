@@ -1,7 +1,6 @@
 clear;clc;close all;
 
-% pathRoot = '/Volumes/bigDisk/sutong-2012-tidy';
-% pathRoot = 'G:/sutong-2012-tidy';
+pathRoot = '/Volumes/midDisk/hangzhouwan-2016Q1-tidy/netmanager_b';
 
 sensorNum = [24];
 dateStart = '2016-02-28';

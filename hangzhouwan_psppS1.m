@@ -1,7 +1,5 @@
 clear;clc;close all;
 
-% pathRoot = '/Volumes/bigDisk/sutong-2012-tidy';
-% pathRoot = 'G:/sutong-2012-tidy';
 pathRoot = 'G:/hangzhouwan-2016Q1-tidy/netmanager_b';
 
 dateStart = '2016-02-29';
