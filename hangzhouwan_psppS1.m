@@ -1,8 +1,9 @@
 clear;clc;close all;
 
-pathRoot = 'G:/hangzhouwan-2016Q1-tidy/netmanager_b';
+pathRoot = '/Volumes/midDisk/hangzhouwan-2016Q1-tidy/netmanager_b';
+% pathRoot = 'G:/hangzhouwan-2016Q1-tidy/netmanager_b';
 
-dateStart = '2016-02-29';
+dateStart = '2016-02-28';
 dateEnd = '2016-02-29';
 sensorTrainRatio = 10/100;
 sensorPSize = 20;
