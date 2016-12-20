@@ -1,0 +1,14 @@
+function Output = FuncName(Input)
+% FuncName - H1 line: Single line description
+% Now the exhaustive help text
+% descibing inputs, processing and outputs
+%
+% Author, Date
+%
+% See also SIN, COS, TheOtherFunction.
+% Copyright: This is published under BSD ...
+% Do not, but you are allowed to, as long as...
+disp('Running the function FuncName');
+...
+    
+end

@@ -1,0 +1,6 @@
+fprintf('\nHow to label:\n')
+    fprintf('Input a number and press enter, the data-plot-on-screen will be labelled into the corresponding set.\n')
+    fprintf('User can assign any number to represent a set, but start from 1 and keep in order is recommended.\n')
+    fprintf('When a new number is input, an acknowledgement will display.\n')
+    fprintf('If user inputs y/yes, a new set class will generate and data-plot-on-screen will be labelled into it.\n')
+    fprintf('If user inputs n/no, user needs to reinput a number for labelling data-plot-on-screen.\n')
