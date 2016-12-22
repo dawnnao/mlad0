@@ -163,7 +163,7 @@ head = 'Continue to step2, label some data for building neural networks?';
 tail = 'Continue to manually make training set...';
 savePath = GetFullPath(dirName.home);
 fileName = dirName.file;
-preset = 'n';
+preset = '';
 fprintf('\n%s\n', head)
 rightInput = 0;
 while rightInput == 0
@@ -434,7 +434,7 @@ for s = sensor.num(1)
     % train network
     [sensor.neuralNet{s},sensor.trainRecord{s}] = ...
         train(sensor.neuralNet{s},feature.image,feature.label.manual);
-    nntraintool close
+%     nntraintool close
 
     % neural net, and view it
     temp.jFrame = view(sensor.neuralNet{s});
@@ -464,7 +464,7 @@ for s = sensor.num(2:end)
     sensor.trainRecord{s} = sensor.trainRecord{sensor.num(1)};
 end
 
-% use net to do classification
+% classification
 for s = sensor.num
     sensor.label.neuralNet{s} = vec2ind(sensor.neuralNet{s}(sensor.image{s}));
     for l = 1:6
@@ -505,15 +505,14 @@ for s = sensor.num
     close
     temp = rmfield(temp, 'image');
 end
-% modify remaining time
 
 % plot panorama
 for s = sensor.num
     panorama(sensor.date.serial{s}, sensor.label.neuralNet{s});
     fprintf('\nSenor-%02d data classification panorama is saved in:\n%s\n', ...
         s, GetFullPath(dirName.home))
-    % fprintf('\nPress anykey to continue.\n')
-    % pause
+    fprintf('\nPress anykey to continue.\n')
+    pause
     dirName.panorama{s} = [sprintf('sensor_%02d_%s--%s', s, date.start, date.end) '_raw_panorama.png'];
     saveas(gcf,[dirName.home '/' dirName.panorama{s}]);
     close
