@@ -121,7 +121,7 @@ for s = sensor.num
     if ~exist(dirName.sensor{s},'dir'), mkdir(dirName.sensor{s}); end
 end
 
-%% 1 read data
+%% 1 glance at data
 if step == 1
 for s = sensor.num
     t(1) = tic;
@@ -190,36 +190,36 @@ end
 
 %% 2 manually make training set
 if step == 1 || step == 2
-% update new parameters
-if step == 2
-    for s = sensor.num
-        newP{1,s} = sensor.trainRatio(s);
-    end
-    newP{2,1} = sensor.pSize;
-    newP{3,1} = step;
-    load([dirName.home '/' dirName.file]);
-    for s = sensor.num
-        sensor.trainRatio(s) = newP{1,s};
-    end
-    sensor.pSize =  newP{2,1};
-    step = newP{3,1};
-    clear newP
-end
 t(2) = tic;
+dirName.formatIn = 'yyyy-mm-dd';
+date.serial.start = datenum(date.start, dirName.formatIn);  % day numbers from year 0000
+date.serial.end   = datenum(date.end, dirName.formatIn);
+hourTotal = (date.serial.end-date.serial.start+1)*24;
 seed = 1;  %intialize
 goNext = 0;
 while goNext == 0
     % randomization
     rng(seed,'twister');
-    sensor.random = randperm(util.hours);
+    sensor.random = randperm(hourTotal);
     for s = sensor.num
-        sensor.label.manual{s} = zeros(6,util.hours);
+        sensor.label.manual{s} = zeros(6,hourTotal);
         % manually label
-        sensor.trainSetSize(s) = floor(sensor.trainRatio(s) * util.hours);
+        sensor.trainSetSize(s) = floor(sensor.trainRatio(s) * hourTotal);
         figure
         n = 1;
         while n <= sensor.trainSetSize(s)
-            sensor.label.manual{s}(:,sensor.random(n)) = zeros(6,1);  % initialize for re-label
+            sensor.label.manual{s}(:,sensor.random(n)) = zeros(6,1);  % initialize for re-label if necessary
+            
+            [random.date, random.hour] = colLocation(sensor.random(n), date.start);
+            random.path = [pathRoot '/' random.date '/' random.date sprintf(' %02d-VIB.mat',random.hour)];
+            
+            if ~exist(random.path, 'file')
+                fprintf('\nCAUTION:\n%s\nNo such file! Filled with a zero.\n', random.path)
+            else
+                read = ['load(''' random.path ''');']; eval(read);
+                sensor.data{s}(:, sensor.random(n)) = data(:, s);
+            end
+            
             plot(sensor.data{s}(:,sensor.random(n)),'color','k');
             set(gcf,'Units','pixels','Position',[100 100 300 300]);  % control figure's position
             set(gca,'Units','normalized', 'Position',[0.1300 0.1100 0.7750 0.8150]);  % control axis's position in figure
@@ -307,10 +307,15 @@ for s = sensor.num
             set(gca,'Units','normalized', 'Position',[0 0 1 1]);  % control axis's position in figure
             set(gca,'visible','off');
             xlim([0 size(manual.label{l}.data{s},1)]);
-            saveas(gcf,[dirName.label.manual{l,s} sprintf('/%s_', sensor.label.name{l}) num2str(count.label{l,s}(n)) '.png']);
-            img = imread([dirName.label.manual{l,s} sprintf('/%s_', sensor.label.name{l}) num2str(count.label{l,s}(n)) '.png']);
+            set(gcf,'color','white');
+            
+            img = getframe(gcf);
+            img = imresize(img.cdata, [100 100]);  % expected dimension
             img = rgb2gray(img);
-            manual.label{l}.image{s}(:,n) = im2double(img(:));
+            img = im2double(img);
+            % imshow(img)
+            imwrite(img,[dirName.label.manual{l,s} sprintf('/%s_', sensor.label.name{l}) num2str(count.label{l,s}(n)) '.png']);
+            manual.label{l}.image{s}(:,n) = img(:);
             tocRemain = toc(ticRemain);
             tRemain = tocRemain * (sensor.trainSetSize(s)*length(sensor.num) - c) / c;
             [hours, mins, secs] = sec2hms(tRemain);
@@ -375,7 +380,14 @@ if step == 3
     end
     newP{2,1} = sensor.pSize;
     newP{3,1} = step;
-    load([dirName.home '/' dirName.file]);
+    if ~exist([dirName.home '/' dirName.file], 'file')
+        fprintf('\nCAUTION:\n%s\nNo such file! ', [dirName.home '/' dirName.file])
+        fprintf('Need to make trainning set (step2) first.\n')
+        return
+    else
+        load([dirName.home '/' dirName.file]);
+    end
+    
     for s = sensor.num
         sensor.trainRatio(s) = newP{1,s};
     end
@@ -384,6 +396,12 @@ if step == 3
     clear newP
 end
 t(3) = tic;
+
+dirName.formatIn = 'yyyy-mm-dd';
+date.serial.start = datenum(date.start, dirName.formatIn);  % day numbers from year 0000
+date.serial.end   = datenum(date.end, dirName.formatIn);
+hourTotal = (date.serial.end-date.serial.start+1)*24;
+
 dirName.net = [dirName.home '/net'];
 if ~exist(dirName.net,'dir'), mkdir(dirName.net); end
 
@@ -456,6 +474,10 @@ end
 
 % classification
 for s = sensor.num
+    
+    
+    
+    
     sensor.label.neuralNet{s} = vec2ind(sensor.neuralNet{s}(sensor.image{s}));
     for l = 1:6
         sensor.count{l,s} = find(sensor.label.neuralNet{s}(:,:) == l);
@@ -475,7 +497,7 @@ end
 % images of classification results
 for s = sensor.num
     figure
-    for n = 1 : util.hours
+    for n = 1 : hourTotal
         ticRemain = tic;
         set(gcf,'Units','pixels','Position',[100 100 100 100]);  % control figure's position
         set(gca,'Units','normalized', 'Position',[0 0 1 1]);  % control axis's position in figure
@@ -483,12 +505,12 @@ for s = sensor.num
         temp.image = reshape(sensor.image{s}(:,n),[util.imageHeight util.imageWidth]);
         imshow(temp.image)
         fprintf('\nGenerating sensor-%02d images...  Total: %d  Now: %d', ...
-            s ,util.hours, n)
+            s ,hourTotal, n)
         fprintf('  %s', sensor.label.name{sensor.label.neuralNet{s}(n)})
         saveas(gcf,[dirName.label.net{sensor.label.neuralNet{s}(n), s} ...
             sprintf('/%s_', sensor.label.name{sensor.label.neuralNet{s}(n)}) num2str(n) '.png']);
         tocRemain = toc(ticRemain);
-        tRemain = tocRemain * (util.hours - n);
+        tRemain = tocRemain * (hourTotal - n);
         [hours, mins, secs] = sec2hms(tRemain);
         fprintf('  About %02dh%02dm%05.2fs left.\n', hours, mins, secs)
     end

@@ -1,4 +1,4 @@
-function [sensorData, dateVec, dateSerial] = glance(pathRead, sensorNum, dayStart, dayEnd, pathSave, prefix)
+function [label, labelCount, dateVec, dateSerial] = classifier(pathRead, sensorNum, dayStart, dayEnd, pathSave, labelName, neuralNet)
 % DESCRIPTION:
 %   This is a subfunction of pspp.m, to read user specified data, and
 %   display progress in command window.
@@ -20,8 +20,16 @@ function [sensorData, dateVec, dateSerial] = glance(pathRead, sensorNum, dayStar
 % DATE CREATED:
 %   2016/12/19  
 
+
+
+for l = 1:6
+    pathSaveNet{l} = [pathSave{s} '/' labelName{l} '/neuralNet'];
+    if ~exist(pathSaveNet{l,s},'dir'), mkdir(pathSaveNet{l}); end
+end
+
 path.root = pathRead;
 hourTotal = (dayEnd-dayStart+1)*24;
+label = zeros(hourTotal,1);
 count = 1;
 figure
 for day = dayStart : dayEnd
@@ -52,9 +60,23 @@ for day = dayStart : dayEnd
         img = imresize(img.cdata, [100 100]);  % expected dimension
         img = rgb2gray(img);
         img = im2double(img);
-        imshow(img)
+%         imshow(img)
 %         set(gcf, 'visible', 'on');
-        pathSaveAll = [pathSave '/' prefix num2str(count) '.png'];
+        
+        
+        label(count) = neuralNet(img(:));
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        pathSaveAll = [pathSaveNet '/' prefix num2str(count) '.png'];
         imwrite(img, pathSaveAll);
         
         tocRemain = toc(ticRemain);
@@ -69,6 +91,13 @@ for day = dayStart : dayEnd
     end
 end
 count = count-1;
+
+
+for l = 1:6
+    labelCount{l} = find(label == l);
+end
+
+
 close all
 clear data
 
