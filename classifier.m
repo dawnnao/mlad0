@@ -20,11 +20,9 @@ function [label, labelCount, dateVec, dateSerial] = classifier(pathRead, sensorN
 % DATE CREATED:
 %   2016/12/19  
 
-
-
 for l = 1:6
-    pathSaveNet{l} = [pathSave{s} '/' labelName{l} '/neuralNet'];
-    if ~exist(pathSaveNet{l,s},'dir'), mkdir(pathSaveNet{l}); end
+    pathSaveNet{l} = [pathSave{s} sprintf('/sensor%02d/', sensorNum) labelName{l} '/neuralNet'];
+    if ~exist(pathSaveNet{l},'dir'), mkdir(pathSaveNet{l}); end
 end
 
 path.root = pathRead;
@@ -63,27 +61,17 @@ for day = dayStart : dayEnd
 %         imshow(img)
 %         set(gcf, 'visible', 'on');
         
+        label(count) = vec2ind(neuralNet(img(:)));
         
-        label(count) = neuralNet(img(:));
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        pathSaveAll = [pathSaveNet '/' prefix num2str(count) '.png'];
+        pathSaveAll = [pathSaveNet{label(count)} '/' labelName{label(count)} num2str(count) '.png'];
         imwrite(img, pathSaveAll);
         
         tocRemain = toc(ticRemain);
         tRemain = tocRemain * (hourTotal - count);
         [hours, mins, secs] = sec2hms(tRemain);
-        fprintf('\nGenerating sensor-%02d images...  %d-%02d-%02d  %02d:00-%02d:00  Done!', ...
-            sensorNum, dateVec(count,1), dateVec(count,2), dateVec(count,3), hour, hour+1)
+        fprintf('\nSensor-%02d  %d-%02d-%02d  %02d:00-%02d:00  %s', ...
+            sensorNum, dateVec(count,1), dateVec(count,2), dateVec(count,3), ...
+            hour, hour+1, labelName(label(count)))
         fprintf('\nTotal: %d  Now: %d  ', hourTotal, count)
         fprintf('About %02dh%02dm%05.2fs left.\n', hours, mins, secs)
         count = count+1;
@@ -92,11 +80,13 @@ for day = dayStart : dayEnd
 end
 count = count-1;
 
-
 for l = 1:6
-    labelCount{l} = find(label == l);
+    labelCount{l,1} = find(label == l); % pass to sensor.count{l,s}
 end
 
+for l = 1:6
+    if isempty(ls(pathSaveNet{l})), rmdir(pathSaveNet{l}); end
+end
 
 close all
 clear data

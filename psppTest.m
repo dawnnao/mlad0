@@ -408,7 +408,6 @@ if ~exist(dirName.net,'dir'), mkdir(dirName.net); end
 feature.image = [];
 feature.label.manual = [];
 
-% add a sensor loop!!!!!!!!!!!!!!!!!!!!!!!!!
 for s = sensor.num
     for l = 1:6
         feature.image = [feature.image manual.label{l}.image{s}];  % modify here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -416,7 +415,6 @@ for s = sensor.num
     end
 end
 
-% !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 % randomization
 rng(seed,'twister');
@@ -474,48 +472,8 @@ end
 
 % classification
 for s = sensor.num
-    
-    
-    
-    
-    sensor.label.neuralNet{s} = vec2ind(sensor.neuralNet{s}(sensor.image{s}));
-    for l = 1:6
-        sensor.count{l,s} = find(sensor.label.neuralNet{s}(:,:) == l);
-    end
-end
-
-% generate realated folder(s)
-for s = sensor.num
-    for l = 1:6
-        if ~isempty(sensor.count{l,s})
-            dirName.label.net{l,s} = [dirName.sensor{s} '/' sensor.label.name{l} '/neuralNet'];
-            if ~exist(dirName.label.net{l,s},'dir'), mkdir(dirName.label.net{l,s}); end
-        end
-    end
-end
-
-% images of classification results
-for s = sensor.num
-    figure
-    for n = 1 : hourTotal
-        ticRemain = tic;
-        set(gcf,'Units','pixels','Position',[100 100 100 100]);  % control figure's position
-        set(gca,'Units','normalized', 'Position',[0 0 1 1]);  % control axis's position in figure
-        set(gca,'visible','off');
-        temp.image = reshape(sensor.image{s}(:,n),[util.imageHeight util.imageWidth]);
-        imshow(temp.image)
-        fprintf('\nGenerating sensor-%02d images...  Total: %d  Now: %d', ...
-            s ,hourTotal, n)
-        fprintf('  %s', sensor.label.name{sensor.label.neuralNet{s}(n)})
-        saveas(gcf,[dirName.label.net{sensor.label.neuralNet{s}(n), s} ...
-            sprintf('/%s_', sensor.label.name{sensor.label.neuralNet{s}(n)}) num2str(n) '.png']);
-        tocRemain = toc(ticRemain);
-        tRemain = tocRemain * (hourTotal - n);
-        [hours, mins, secs] = sec2hms(tRemain);
-        fprintf('  About %02dh%02dm%05.2fs left.\n', hours, mins, secs)
-    end
-    close
-    temp = rmfield(temp, 'image');
+    [sensor.label.neuralNet{s}, sensor.count{l,s}, sensor.date.vec{s}, sensor.date.serial{s}] = ...
+        classifier(pathRoot, s, dateStart, dateEnd, dirName.home, sensor.label.name, sensor.neuralNet{s});
 end
 
 % plot panorama
