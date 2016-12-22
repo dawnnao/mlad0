@@ -1,4 +1,4 @@
-function sensor = lpspp(pathRoot, sensorNum, dateStart, dateEnd, sensorTrainRatio, sensorPSize, step)
+function sensor = psppTest(pathRoot, sensorNum, dateStart, dateEnd, sensorTrainRatio, sensorPSize, step)
 % DESCRIPTION:
 %   This is a smart pre-processing(spp) function for bridge's structural
 %   health monitoring data. The work flow is: read tidy data -> assist user
@@ -84,7 +84,7 @@ function sensor = lpspp(pathRoot, sensorNum, dateStart, dateEnd, sensorTrainRati
 % set input defaults:
 if ~exist('sensorTrainRatio', 'var') || isempty(sensorTrainRatio), sensorTrainRatio = 5/100; end
 if ~exist('sensorPSize', 'var') || isempty(sensorPSize), sensorPSize = 10; end
-if ~exist('step', 'var') || isempty(step), step = 1:4, preset = []; end
+if ~exist('step', 'var') || isempty(step), step = 1; end
 
 %% pass variables
 sensor.num = sensorNum;
@@ -121,35 +121,25 @@ for s = sensor.num
     if ~exist(dirName.sensor{s},'dir'), mkdir(dirName.sensor{s}); end
 end
 
-%% 1 glance at data
-if ismember(1, step)
+%% 1 read data
+if step == 1
 for s = sensor.num
     t(1) = tic;
-
+    
     dirName.formatIn = 'yyyy-mm-dd';
     date.serial.start = datenum(date.start, dirName.formatIn);  % day numbers from year 0000
     date.serial.end   = datenum(date.end, dirName.formatIn);
-
-    % read data from mat file
-    [sensor.data{s}, sensor.date.vec{s}, sensor.date.serial{s}] = ...
-        readIn(pathRoot, s, date.serial.start, date.serial.end);
-%     if isempty(sensor.data{s}), fprintf('\nFinish!\n'), return, end
-    util.hours = size(sensor.data{s},2);
-
-    % plot
+    
+    % plot from mat file
     dirName.all{s} = [dirName.sensor{s} '/0-all'];
     if ~exist(dirName.all{s},'dir'), mkdir(dirName.all{s}); end
     
-    [sensor.image{s}, util.imageWidth, util.imageHeight] = ...
-        imageGen(s, sensor.data{s}, dirName.all{s}, '0-all_');
-    
-    % check sensor.image is full filled or not
-    fprintf('\n\n\nCheck images generation ...\n')
-    fprintf('=0 for all done :)\n>0 for omit something :(\nResult: %d\n', ...
-        sum(sum(isnan(sensor.image{s}))))
+    [~, sensor.date.vec{s}, sensor.date.serial{s}] = ...
+        glance(pathRoot, s, date.serial.start, date.serial.end, dirName.all{s}, '0-all_');
+    util.hours = size(sensor.date.vec{s}, 1);
     
     elapsedTime(1) = toc(t(1)); [hours, mins, secs] = sec2hms(elapsedTime(1));
-    fprintf('\nSTEP1:\nSensor-%02d data reading completes, using %02d:%02d:%05.2f .\n', ...
+    fprintf('\nSTEP1:\nSensor-%02d data images generation completes, using %02d:%02d:%05.2f .\n', ...
         s, hours, mins, secs)
     
     % work flow status
@@ -163,9 +153,11 @@ head = 'Continue to step2, label some data for building neural networks?';
 tail = 'Continue to manually make training set...';
 savePath = GetFullPath(dirName.home);
 fileName = dirName.file;
+preset = 'n';
 fprintf('\n%s\n', head)
 rightInput = 0;
 while rightInput == 0
+    if ~exist('preset', 'var'), preset = []; end
     if strcmp(preset, 'y')  || strcmp(preset, 'yes')
         go = 'y';
     elseif strcmp(preset, 'n')  || strcmp(preset, 'no')
@@ -197,7 +189,7 @@ clear head tail savePath fileName preset
 end
 
 %% 2 manually make training set
-if ismember(2, step)
+if step == 1 || step == 2
 % update new parameters
 if step == 2
     for s = sensor.num
@@ -375,7 +367,7 @@ clear head tail savePath fileName preset
 end
 
 %% 3 train network and do classification
-if ismember(3, step)
+if step == 1 || step == 2 || step == 3
 % update new parameters
 if step == 3
     for s = sensor.num
@@ -563,7 +555,7 @@ clear head tail savePath fileName preset
 end
 
 %% 4 clean outliers
-if ismember(4, step)
+if step == 1 || step == 2 || step == 3 || step == 4
 % update new parameters
 if step == 4
     for s = sensor.num
