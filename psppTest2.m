@@ -143,7 +143,7 @@ for s = sensor.num
     
     [~, sensor.date.vec{s}, sensor.date.serial{s}] = ...
         glance(pathRoot, s, date.serial.start, date.serial.end, dirName.all{s}, '0-all_');
-    util.hours = size(sensor.date.vec{s}, 1);
+%     util.hours = size(sensor.date.vec{s}, 1);
     
     elapsedTime(1) = toc(t(1)); [hours, mins, secs] = sec2hms(elapsedTime(1));
     fprintf('\nSTEP1:\nSensor-%02d data plot completes, using %02d:%02d:%05.2f .\n', ...
@@ -258,6 +258,7 @@ while goNext == 0
             count.label{l,s} = find(sensor.label.manual{s}(l,:));
             manual.label{l}.data{s} = sensor.data{s}(:,count.label{l,s});
         end
+        sensor = rmfield(sensor, 'data');
     end
     
     % save manual label results
@@ -333,6 +334,7 @@ for s = sensor.num
             fprintf('About %02dh%02dm%05.2fs left.\n', hours, mins, secs)
         end
         close
+        clear img
     end
     % update sensor.status
     sensor.status{s}(2,2) = {1};
