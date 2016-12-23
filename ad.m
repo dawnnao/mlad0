@@ -1,4 +1,4 @@
-function sensor = psppTest(pathRoot, sensorNum, dateStart, dateEnd, sensorTrainRatio, sensorPSize, step)
+function sensor = ad(pathRoot, sensorNum, dateStart, dateEnd, sensorTrainRatio, sensorPSize, step)
 % DESCRIPTION:
 %   This is a smart pre-processing(spp) function for bridge's structural
 %   health monitoring data. The work flow is: read tidy data -> assist user
@@ -84,7 +84,7 @@ function sensor = psppTest(pathRoot, sensorNum, dateStart, dateEnd, sensorTrainR
 % set input defaults:
 if ~exist('sensorTrainRatio', 'var') || isempty(sensorTrainRatio), sensorTrainRatio = 5/100; end
 if ~exist('sensorPSize', 'var') || isempty(sensorPSize), sensorPSize = 10; end
-if ~exist('step', 'var') || isempty(step), step = 1; end
+if ~exist('step', 'var'), step = []; end
 
 %% pass variables
 sensor.num = sensorNum;
@@ -101,20 +101,7 @@ sensorStr = tidyName(abbr(sensor.num));
 dirName.home = sprintf('%s--%s_sensor%s', date.start, date.end, sensorStr);
 dirName.file = [dirName.home '.mat'];
 
-if ~exist(dirName.home,'dir')
-    mkdir(dirName.home);
-else
-    if step == 1
-        a = 0;
-        n = 2;
-        while a == 0
-            temp = [dirName.home sprintf(' %d', n)];
-            if ~exist(temp,'dir'), dirName.home = temp; mkdir(dirName.home); a = 1;
-            else n = n + 1; end
-        end
-        clear temp
-    end
-end
+if ~exist(dirName.home,'dir'), mkdir(dirName.home); end
 
 for s = sensor.num
     dirName.sensor{s} = [dirName.home sprintf('/sensor%02d', s)];
@@ -122,7 +109,7 @@ for s = sensor.num
 end
 
 %% 1 glance at data
-if step == 1
+if ismember(1, step) || isempty(step)
 for s = sensor.num
     t(1) = tic;
     
@@ -132,14 +119,34 @@ for s = sensor.num
     
     % plot from mat file
     dirName.all{s} = [dirName.sensor{s} '/0-all'];
-    if ~exist(dirName.all{s},'dir'), mkdir(dirName.all{s}); end
+    if ~exist(dirName.all{s},'dir'), mkdir(dirName.all{s});
+    else
+        if ~isempty(ls(dirName.all{s}))
+            fprintf('\n%s\n\nFolder is already there and not empty, continue?\n', dirName.all{s})
+            rightInput = 0;
+            while rightInput == 0
+                prompt = 'y(yes)/n(no): ';
+                go = input(prompt,'s');
+                if strcmp(go,'y') || strcmp(go,'yes')
+                    rightInput = 1;
+                    fprintf('\nContinue...\n')
+                elseif strcmp(go,'n') || strcmp(go,'no')
+                    rightInput = 1;
+                    fprintf('\nFinish.\n')
+                    return
+                else
+                    fprintf('Invalid input! Please re-input.\n')
+                end
+            end
+        end
+    end
     
     [~, sensor.date.vec{s}, sensor.date.serial{s}] = ...
         glance(pathRoot, s, date.serial.start, date.serial.end, dirName.all{s}, '0-all_');
-    util.hours = size(sensor.date.vec{s}, 1);
+%     util.hours = size(sensor.date.vec{s}, 1);
     
     elapsedTime(1) = toc(t(1)); [hours, mins, secs] = sec2hms(elapsedTime(1));
-    fprintf('\nSTEP1:\nSensor-%02d data images generation completes, using %02d:%02d:%05.2f .\n', ...
+    fprintf('\nSTEP1:\nSensor-%02d data plot completes, using %02d:%02d:%05.2f .\n', ...
         s, hours, mins, secs)
     
     % work flow status
@@ -151,45 +158,49 @@ end
 % ask go on or stop
 head = 'Continue to step2, label some data for building neural networks?';
 tail = 'Continue to manually make training set...';
-savePath = GetFullPath(dirName.home);
-fileName = dirName.file;
-preset = 'n';
-fprintf('\n%s\n', head)
-rightInput = 0;
-while rightInput == 0
-    if ~exist('preset', 'var'), preset = []; end
-    if strcmp(preset, 'y')  || strcmp(preset, 'yes')
-        go = 'y';
-    elseif strcmp(preset, 'n')  || strcmp(preset, 'no')
-        go = 'n';
-    else
+if isempty(step)
+    rightInput = 0;
+    while rightInput == 0
+        fprintf('\n%s\n', head)
         prompt = 'y(yes)/n(no): ';
         go = input(prompt,'s');
-    end
-
-    if strcmp(go,'y') || strcmp(go,'yes')
-        rightInput = 1;
-        fprintf('\n%s\n\n\n', tail)
-    elseif strcmp(go,'n') || strcmp(go,'no')
-        rightInput = 1;
-        fprintf('\nSaving results...\nLocation: %s\n', savePath)
-        if exist([savePath '/' fileName], 'file')
-            delete([savePath '/' fileName]);
+        if strcmp(go,'y') || strcmp(go,'yes')
+            rightInput = 1; fprintf('\n%s\n\n\n', tail)
+        elseif strcmp(go,'n') || strcmp(go,'no')
+            rightInput = 1; fprintf('\nFinish.\n'), return
+        else fprintf('Invalid input! Please re-input.\n')
         end
-        save([savePath '/' fileName], '-v7.3')
-        fprintf('\nFinish! Check data status in sensor.status .\n')
-        return
-    else
-        fprintf('Invalid input! Please re-input.\n')
     end
+elseif step == 1, fprintf('\nFinish.\n'), return
+elseif ismember(2, step), fprintf('\n%s\n\n\n', tail)
 end
-pause(2)
-clear head tail savePath fileName preset
+pause(0.5)
+clear head tail
 
 end
 
 %% 2 manually make training set
-if step == 1 || step == 2
+if ismember(2, step) || isempty(step)
+
+if exist([dirName.home '/' dirName.file], 'file')
+    fprintf('\n%s\n\nFile is already there, overwrite it?\n', [dirName.home '/' dirName.file])
+    rightInput = 0;
+    while rightInput == 0
+        prompt = 'y(yes)/n(no): ';
+        go = input(prompt,'s');
+        if strcmp(go,'y') || strcmp(go,'yes')
+            rightInput = 1;
+            fprintf('\nContinue...\n')
+        elseif strcmp(go,'n') || strcmp(go,'no')
+            rightInput = 1;
+            fprintf('\nFinish.\n')
+            return
+        else
+            fprintf('Invalid input! Please re-input.\n')
+        end
+    end
+end
+
 t(2) = tic;
 dirName.formatIn = 'yyyy-mm-dd';
 date.serial.start = datenum(date.start, dirName.formatIn);  % day numbers from year 0000
@@ -202,13 +213,13 @@ while goNext == 0
     rng(seed,'twister');
     sensor.random = randperm(hourTotal);
     for s = sensor.num
-        sensor.label.manual{s} = zeros(6,hourTotal);
+        sensor.label.manual{s} = zeros(8,hourTotal);
         % manually label
         sensor.trainSetSize(s) = floor(sensor.trainRatio(s) * hourTotal);
         figure
         n = 1;
         while n <= sensor.trainSetSize(s)
-            sensor.label.manual{s}(:,sensor.random(n)) = zeros(6,1);  % initialize for re-label if necessary
+            sensor.label.manual{s}(:,sensor.random(n)) = zeros(8,1);  % initialize for re-label if necessary
             
             [random.date, random.hour] = colLocation(sensor.random(n), date.start);
             random.path = [pathRoot '/' random.date '/' random.date sprintf(' %02d-VIB.mat',random.hour)];
@@ -219,16 +230,18 @@ while goNext == 0
                 read = ['load(''' random.path ''');']; eval(read);
                 sensor.data{s}(:, sensor.random(n)) = data(:, s);
             end
-            
+            clear data
             plot(sensor.data{s}(:,sensor.random(n)),'color','k');
             set(gcf,'Units','pixels','Position',[100 100 300 300]);  % control figure's position
             set(gca,'Units','normalized', 'Position',[0.1300 0.1100 0.7750 0.8150]);  % control axis's position in figure
             xlim([0 size(sensor.data{s},1)]);
             fprintf('\nSensor-%02d trainning set size: %d  Now: %d\n', s, sensor.trainSetSize(s), n)
-            prompt = 'Data type:\n1-normal      2-missing    3-outlier\n4-outrange    5-drift      6-trend\n0-redo previous\nInput: ';
+            fprintf('Data type:\n1-normal    2-outlier    3-square    4-missing')
+            fprintf('\n5-trend     6-drift      7-bias      8-cutoff')
+            prompt = '\n0-redo previous\nInput: ';
             classify = input(prompt,'s');
             classify = str2double(classify);  % filter charactor input
-            if classify <= 6 && classify >= 1
+            if classify <= 8 && classify >= 1
                 sensor.label.manual{s}(classify,sensor.random(n)) = 1;
                 n = n + 1;
             elseif classify == 0
@@ -238,22 +251,23 @@ while goNext == 0
                 else fprintf('\nThis is already the first!\n')
                 end
             else
-                fprintf('\n\n\n\n\n\nInvalid input! Input 1-6 for labelling, 0 for redoing previous one.\n')
+                fprintf('\n\n\n\n\n\nInvalid input! Input 1-8 for labelling, 0 for redoing previous one.\n')
             end
         end
         close
         % count manual label results
-        for l = 1:6
+        for l = 1:8
             count.label{l,s} = find(sensor.label.manual{s}(l,:));
             manual.label{l}.data{s} = sensor.data{s}(:,count.label{l,s});
         end
+        sensor = rmfield(sensor, 'data');
     end
     
     % save manual label results
-    sensor.label.name = {'1-normal','2-missing','3-outlier','4-outrange','5-drift','6-trend'};
+    sensor.label.name = {'1-normal','2-outlier','3-square','4-missing','5-trend','6-drift','7-bias','8-cutoff'};
     fprintf('\n\n\n\n\n\nCurrent existing data type:\n')
     % display existing data type(s) and creat folder(s)
-    for l = 1:6
+    for l = 1:8
         sumParal = 0;
         for ss = sensor.num
             sumParal = sumParal + size(manual.label{l}.data{ss},2);
@@ -295,7 +309,7 @@ end
 ticRemain = tic;
 c = 0; % total count
 for s = sensor.num
-    for l = 1:6
+    for l = 1:8
         manual.label{l}.image{s} = [];
         figure
         for n = 1:size(manual.label{l}.data{s},2)
@@ -322,6 +336,7 @@ for s = sensor.num
             fprintf('About %02dh%02dm%05.2fs left.\n', hours, mins, secs)
         end
         close
+        clear img
     end
     % update sensor.status
     sensor.status{s}(2,2) = {1};
@@ -334,55 +349,44 @@ fprintf('\n\n\nSTEP2:\nSensor(s) training set making completes, using %02d:%02d:
 % ask go on or stop
 head = 'Continue to step3, automatically train neural network and do classification now?';
 tail = 'Continue to automatically train neural network and do classification...';
-savePath = GetFullPath(dirName.home);
-fileName = dirName.file;
-preset = [];
-fprintf('\n%s\n', head)
-rightInput = 0;
-while rightInput == 0
-    if ~exist('preset', 'var'), preset = []; end
-    if strcmp(preset, 'y')  || strcmp(preset, 'yes')
-        go = 'y';
-    elseif strcmp(preset, 'n')  || strcmp(preset, 'no')
-        go = 'n';
-    else
+savePath = [GetFullPath(dirName.home) '/' dirName.file];
+fprintf('\nSaving results...\nLocation: %s\n', savePath)
+if exist(savePath, 'file'), delete(savePath); end
+save(savePath, 'sensor', 'manual', 'count', '-v7.3')
+
+if isempty(step)
+    rightInput = 0;
+    while rightInput == 0
+        fprintf('\n%s\n', head)
         prompt = 'y(yes)/n(no): ';
         go = input(prompt,'s');
-    end
-
-    if strcmp(go,'y') || strcmp(go,'yes')
-        rightInput = 1;
-        fprintf('\n%s\n\n\n', tail)
-    elseif strcmp(go,'n') || strcmp(go,'no')
-        rightInput = 1;
-        fprintf('\nSaving results...\nLocation: %s\n', savePath)
-        if exist([savePath '/' fileName], 'file')
-            delete([savePath '/' fileName]);
+        if strcmp(go,'y') || strcmp(go,'yes')
+            rightInput = 1; fprintf('\n%s\n\n\n', tail)
+        elseif strcmp(go,'n') || strcmp(go,'no')
+            rightInput = 1; fprintf('\nFinish.\n'), return
+        else fprintf('Invalid input! Please re-input.\n')
         end
-        save([savePath '/' fileName], '-v7.3')
-        fprintf('\nFinish! Check data status in sensor.status .\n')
-        return
-    else
-        fprintf('Invalid input! Please re-input.\n')
     end
+elseif step == 1, fprintf('\nFinish.\n'), return
+elseif ismember(2, step), fprintf('\n%s\n\n\n', tail)
 end
-pause(2)
-clear head tail savePath fileName preset
+pause(0.5)
+clear head tail savePath
 
 end
 
 %% 3 train network and do classification
-if step == 1 || step == 2 || step == 3
+if ismember(3, step) || isempty(step)
 % update new parameters
-if step == 3
+if ~isempty(step) && step(1) == 3
     for s = sensor.num
         newP{1,s} = sensor.trainRatio(s);
     end
     newP{2,1} = sensor.pSize;
     newP{3,1} = step;
     if ~exist([dirName.home '/' dirName.file], 'file')
-        fprintf('\nCAUTION:\n%s\nNo such file! ', [dirName.home '/' dirName.file])
-        fprintf('Need to make trainning set (step2) first.\n')
+        fprintf('CAUTION:\n%s\nNo such file! ', [dirName.home '/' dirName.file])
+        fprintf('Need to make trainning set (step2) first.\nFinish.\n')
         return
     else
         load([dirName.home '/' dirName.file]);
@@ -409,7 +413,7 @@ feature.image = [];
 feature.label.manual = [];
 
 for s = sensor.num
-    for l = 1:6
+    for l = 1:8
         feature.image = [feature.image manual.label{l}.image{s}];  % modify here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         feature.label.manual = [feature.label.manual sensor.label.manual{s}(:,count.label{l,s})];  % modify here !!!!!!!!!!!!!!!!!!!!!!!
     end
@@ -417,6 +421,7 @@ end
 
 
 % randomization
+seed = 1;
 rng(seed,'twister');
 randp = randperm(size(feature.image,2));
 feature.image = feature.image(:, randp);
@@ -473,69 +478,57 @@ end
 % classification
 for s = sensor.num
     [sensor.label.neuralNet{s}, sensor.count{l,s}, sensor.date.vec{s}, sensor.date.serial{s}] = ...
-        classifier(pathRoot, s, dateStart, dateEnd, dirName.home, sensor.label.name, sensor.neuralNet{s});
+        classifier(pathRoot, s, date.serial.start, date.serial.end, dirName.home, sensor.label.name, sensor.neuralNet{s});
 end
 
 % plot panorama
 for s = sensor.num
-    panorama(sensor.date.serial{s}, sensor.label.neuralNet{s});
-    fprintf('\nSenor-%02d data classification panorama is saved in:\n%s\n', ...
-        s, GetFullPath(dirName.home))
+    panorama(sensor.date.serial{s}, sensor.label.neuralNet{s}, sprintf('Sensor%02d', s));
+    dirName.panorama{s} = [sprintf('sensor_%02d_%s--%s', s, date.start, date.end) '_anomalyDetectionPanorama.png'];
+    saveas(gcf,[dirName.home '/' dirName.panorama{s}]);
+    fprintf('\nSenor-%02d anomaly detection panorama file location:\n%s\n', ...
+        s, GetFullPath([dirName.home '/' dirName.panorama{s}]))
     fprintf('\nPress anykey to continue.\n')
     pause
-    dirName.panorama{s} = [sprintf('sensor_%02d_%s--%s', s, date.start, date.end) '_raw_panorama.png'];
-    saveas(gcf,[dirName.home '/' dirName.panorama{s}]);
     close
     % update sensor.status
     sensor.status{s}(2,3) = {1};
 end
 
 elapsedTime(3) = toc(t(3)); [hours, mins, secs] = sec2hms(elapsedTime(3));
-fprintf('\n\n\nSTEP3:\nClassification completes, using %02d:%02d:%05.2f .\n', ...
+fprintf('\n\n\nSTEP3:\nAnomaly detection completes, using %02d:%02d:%05.2f .\n', ...
     hours, mins, secs)
 
 % ask go on or stop
 head = 'Continue to step4, automatically remove outliers?';
 tail = 'Continue to automatically remove outliers...';
-savePath = GetFullPath(dirName.home);
-fileName = dirName.file;
-preset = [];
-fprintf('\n%s\n', head)
-rightInput = 0;
-while rightInput == 0
-    if ~exist('preset', 'var'), preset = []; end
-    if strcmp(preset, 'y')  || strcmp(preset, 'yes')
-        go = 'y';
-    elseif strcmp(preset, 'n')  || strcmp(preset, 'no')
-        go = 'n';
-    else
+savePath = [GetFullPath(dirName.home) '/' dirName.file];
+fprintf('\nSaving results...\nLocation: %s\n', savePath)
+if exist(savePath, 'file'), delete(savePath); end
+save(savePath, '-v7.3')
+if isempty(step)
+    rightInput = 0;
+    while rightInput == 0
+        fprintf('\n%s\n', head)
         prompt = 'y(yes)/n(no): ';
         go = input(prompt,'s');
-    end
-
-    if strcmp(go,'y') || strcmp(go,'yes')
-        rightInput = 1;
-        fprintf('\n%s\n\n\n', tail)
-    elseif strcmp(go,'n') || strcmp(go,'no')
-        rightInput = 1;
-        fprintf('\nSaving results...\nLocation: %s\n', savePath)
-        if exist([savePath '/' fileName], 'file')
-            delete([savePath '/' fileName]);
+        if strcmp(go,'y') || strcmp(go,'yes')
+            rightInput = 1; fprintf('\n%s\n\n\n', tail)
+        elseif strcmp(go,'n') || strcmp(go,'no')
+            rightInput = 1; fprintf('\nFinish.\n'), return
+        else fprintf('Invalid input! Please re-input.\n')
         end
-        save([savePath '/' fileName], '-v7.3')
-        fprintf('\nFinish! Check data status in sensor.status .\n')
-        return
-    else
-        fprintf('Invalid input! Please re-input.\n')
     end
+elseif step == 1, fprintf('\nFinish.\n'), return
+elseif ismember(2, step), fprintf('\n%s\n\n\n', tail)
 end
-pause(2)
-clear head tail savePath fileName preset
+pause(0.5)
+clear head tail savePath
 
 end
 
 %% 4 clean outliers
-if step == 1 || step == 2 || step == 3 || step == 4
+if ismember(4, step) || isempty(step)
 % update new parameters
 if step == 4
     for s = sensor.num
