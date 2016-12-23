@@ -1,4 +1,4 @@
-function sensor = ad(pathRoot, sensorNum, dateStart, dateEnd, sensorTrainRatio, sensorPSize, step)
+function sensor = adi(pathRoot, sensorNum, dateStart, dateEnd, sensorTrainRatio, sensorPSize, step)
 % DESCRIPTION:
 %   This is a smart pre-processing(spp) function for bridge's structural
 %   health monitoring data. The work flow is: read tidy data -> assist user
@@ -484,7 +484,7 @@ end
 % plot panorama
 for s = sensor.num
     panorama(sensor.date.serial{s}, sensor.label.neuralNet{s}, sprintf('Sensor%02d', s));
-    dirName.panorama{s} = [sprintf('sensor_%02d_%s--%s', s, date.start, date.end) '_anomalyDetectionPanorama.png'];
+    dirName.panorama{s} = [sprintf('%s--%s_sensor_%02d', date.start, date.end, s) '_anomalyDetectionPanorama.png'];
     saveas(gcf,[dirName.home '/' dirName.panorama{s}]);
     fprintf('\nSenor-%02d anomaly detection panorama file location:\n%s\n', ...
         s, GetFullPath([dirName.home '/' dirName.panorama{s}]))
@@ -495,8 +495,46 @@ for s = sensor.num
     sensor.status{s}(2,3) = {1};
 end
 
+% plot monthly stats per sensor
+for s = sensor.num
+    for n = 1 : 12
+        for l = 1 : 8
+            aim = find(sensor.date.vec{s}(:,2) == n);
+            sensor.statsPerSensor{s}(n, l) = length(find(sensor.label.neuralNet{s}(aim) == l));
+        end
+    end
+    monthStatsPerSensor(sensor.statsPerSensor{s}, s, sensor.label.name);
+    dirName.statsPerSensor{s} = [sprintf('%s--%s_sensor_%02d', date.start, date.end, s) '_anomalyStats.png'];
+    saveas(gcf,[dirName.home '/' dirName.statsPerSensor{s}]);
+    fprintf('\nSenor-%02d anomaly stats bar-plot file location:\n%s\n', ...
+        s, GetFullPath([dirName.home '/' dirName.statsPerSensor{s}]))
+    fprintf('\nPress anykey to continue.\n')
+    pause
+    close
+end
+
+% plot anomaly space-time distribution per type
+for l = 1 : 8
+   for s = sensor.num
+       for n = 1 : 12
+           aim = find(sensor.date.vec{s}(:,2) == n);
+           sensor.statsPerLabel{l}(n, s) = length(find(sensor.label.neuralNet{s}(aim) == l));
+       end
+   end
+   if sum(sum(sensor.statsPerLabel{l})) > 0
+        monthStatsPerLabel(sensor.statsPerLabel{l}, l, sensor.label.name{l});
+        dirName.statsPerLabel{l} = [sprintf('%s--%s_sensor%s_%s', date.start, date.end, sensorStr, sensor.label.name{l}) '_anomalyStats.png'];
+        saveas(gcf,[dirName.home '/' dirName.statsPerLabel{l}]);
+        fprintf('\n%s anomaly stats bar-plot file location:\n%s\n', ...
+            sensor.label.name{l}, GetFullPath([dirName.home '/' dirName.statsPerLabel{l}]))
+        fprintf('\nPress anykey to continue.\n')
+        pause
+        close
+    end
+end
+
 elapsedTime(3) = toc(t(3)); [hours, mins, secs] = sec2hms(elapsedTime(3));
-fprintf('\n\n\nSTEP3:\nAnomaly detection completes, using %02d:%02d:%05.2f .\n', ...
+fprintf('\n\n\nSTEP3:\nAnomaly detection completes, using %02dh%02dm%05.2fs .\n', ...
     hours, mins, secs)
 
 % ask go on or stop
