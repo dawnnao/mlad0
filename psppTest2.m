@@ -213,13 +213,13 @@ while goNext == 0
     rng(seed,'twister');
     sensor.random = randperm(hourTotal);
     for s = sensor.num
-        sensor.label.manual{s} = zeros(6,hourTotal);
+        sensor.label.manual{s} = zeros(8,hourTotal);
         % manually label
         sensor.trainSetSize(s) = floor(sensor.trainRatio(s) * hourTotal);
         figure
         n = 1;
         while n <= sensor.trainSetSize(s)
-            sensor.label.manual{s}(:,sensor.random(n)) = zeros(6,1);  % initialize for re-label if necessary
+            sensor.label.manual{s}(:,sensor.random(n)) = zeros(8,1);  % initialize for re-label if necessary
             
             [random.date, random.hour] = colLocation(sensor.random(n), date.start);
             random.path = [pathRoot '/' random.date '/' random.date sprintf(' %02d-VIB.mat',random.hour)];
@@ -236,10 +236,12 @@ while goNext == 0
             set(gca,'Units','normalized', 'Position',[0.1300 0.1100 0.7750 0.8150]);  % control axis's position in figure
             xlim([0 size(sensor.data{s},1)]);
             fprintf('\nSensor-%02d trainning set size: %d  Now: %d\n', s, sensor.trainSetSize(s), n)
-            prompt = 'Data type:\n1-normal      2-missing    3-outlier\n4-outrange    5-drift      6-trend\n0-redo previous\nInput: ';
+            fprintf('Data type:\n1-normal    2-outlier    3-square    4-missing')
+            fprintf('\n5-trend     6-drift      7-bias      8-cutoff')
+            prompt = '\n0-redo previous\nInput: ';
             classify = input(prompt,'s');
             classify = str2double(classify);  % filter charactor input
-            if classify <= 6 && classify >= 1
+            if classify <= 8 && classify >= 1
                 sensor.label.manual{s}(classify,sensor.random(n)) = 1;
                 n = n + 1;
             elseif classify == 0
@@ -249,12 +251,12 @@ while goNext == 0
                 else fprintf('\nThis is already the first!\n')
                 end
             else
-                fprintf('\n\n\n\n\n\nInvalid input! Input 1-6 for labelling, 0 for redoing previous one.\n')
+                fprintf('\n\n\n\n\n\nInvalid input! Input 1-8 for labelling, 0 for redoing previous one.\n')
             end
         end
         close
         % count manual label results
-        for l = 1:6
+        for l = 1:8
             count.label{l,s} = find(sensor.label.manual{s}(l,:));
             manual.label{l}.data{s} = sensor.data{s}(:,count.label{l,s});
         end
@@ -262,10 +264,10 @@ while goNext == 0
     end
     
     % save manual label results
-    sensor.label.name = {'1-normal','2-missing','3-outlier','4-outrange','5-drift','6-trend'};
+    sensor.label.name = {'1-normal','2-outlier','3-square','4-missing','5-trend','6-drift','7-bias','8-cutoff'};
     fprintf('\n\n\n\n\n\nCurrent existing data type:\n')
     % display existing data type(s) and creat folder(s)
-    for l = 1:6
+    for l = 1:8
         sumParal = 0;
         for ss = sensor.num
             sumParal = sumParal + size(manual.label{l}.data{ss},2);
@@ -307,7 +309,7 @@ end
 ticRemain = tic;
 c = 0; % total count
 for s = sensor.num
-    for l = 1:6
+    for l = 1:8
         manual.label{l}.image{s} = [];
         figure
         for n = 1:size(manual.label{l}.data{s},2)
@@ -411,7 +413,7 @@ feature.image = [];
 feature.label.manual = [];
 
 for s = sensor.num
-    for l = 1:6
+    for l = 1:8
         feature.image = [feature.image manual.label{l}.image{s}];  % modify here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         feature.label.manual = [feature.label.manual sensor.label.manual{s}(:,count.label{l,s})];  % modify here !!!!!!!!!!!!!!!!!!!!!!!
     end

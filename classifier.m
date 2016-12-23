@@ -20,7 +20,7 @@ function [label, labelCount, dateVec, dateSerial] = classifier(pathRead, sensorN
 % DATE CREATED:
 %   2016/12/19  
 
-for l = 1:6
+for l = 1:8
     pathSaveType{l} = [pathSave sprintf('/sensor%02d/', sensorNum) labelName{l}];
     pathSaveNet{l} = [pathSaveType{l} '/neuralNet'];
     if ~exist(pathSaveNet{l},'dir'), mkdir(pathSaveNet{l}); end
@@ -82,11 +82,11 @@ for day = dayStart : dayEnd
 end
 count = count-1;
 
-for l = 1:6
+for l = 1:8
     labelCount{l,1} = find(label == l); % pass to sensor.count{l,s}
 end
 
-for l = 1:6
+for l = 1:8
     if isempty(ls(pathSaveNet{l})), rmdir(pathSaveType{l}, 's'); end
 end
 

@@ -26,9 +26,9 @@ function panorama(xSerial, yLabel, yStr)
 interval = xSerial(end) - xSerial(end-1);
 plotx = [xSerial; xSerial(end)+interval];
 
-ploty = zeros(6, size(yLabel, 2));
+ploty = zeros(8, size(yLabel, 2));
 
-for l = 1:6
+for l = 1:8
     ploty(l, find(yLabel == l)) = 1;
 end
 
@@ -37,8 +37,8 @@ for n = 1:3
     plotyTri{n} = ploty;  % intiallize
     plotyTri{n}(:, zeroSet(n,1):3:end) = 0;
     plotyTri{n}(:, zeroSet(n,2):3:end) = 0;
-    plotyTempa = [plotyTri{n} zeros(6,1)];
-    plotyTempb = [zeros(6,1) plotyTri{n}];  % move one point to right
+    plotyTempa = [plotyTri{n} zeros(8,1)];
+    plotyTempb = [zeros(8,1) plotyTri{n}];  % move one point to right
     plotyTri{n} = plotyTempa + plotyTempb;  % combine
     plotyTri{n}(find(plotyTri{n} == 0)) = NaN;
     clear plotyTempa plotyTempb
@@ -47,21 +47,17 @@ end
 %%
 % RGB color
 color.label{1} = [129 199 132]/255;  % 1-normal     green
-color.label{2} = [168 168 168]/255;  % 2-missing    gray
-color.label{3} = [255 112 67]/255;  % 3-outlier    orange
-color.label{4} = [244 67 54]/255;    % 4-outrange   red
-color.label{5} = [171 71 188]/255;  % 5-drift      purple
-color.label{6} = [33 150 243]/255;   % 6-trend      blue
-% color.label{1} = [165 214 167]/255;  % 1-normal     green
-% color.label{2} = [199 199 199]/255;  % 2-missing    gray
-% color.label{3} = [255 138 128]/255;  % 3-outlier    orange
-% color.label{4} = [239 83 80]/255;    % 4-outrange   red
-% color.label{5} = [186 104 200]/255;  % 5-drift      purple
-% color.label{6} = [66 165 245]/255;   % 6-trend      blue
+color.label{2} = [244 67 54]/255;    % 2-outlier    red
+color.label{3} = [121 85 72]/255;    % 3-square     brown
+color.label{4} = [255 112 67]/255;   % 4-missing    orange
+color.label{5} = [33 150 243]/255;   % 5-trend      blue
+color.label{6} = [171 71 188]/255;   % 6-drift      purple
+color.label{7} = [255 235 59]/255;   % 7-bias       yellow
+color.label{8} = [168 168 168]/255;  % 8-cutoff     gray
 color.axis = [107 107 107]/255;
 
 figure
-for l = 1:6
+for l = 1:8
     for n = 1:3
         area(plotx, plotyTri{n}(l,:), ...
             'edgecolor', 'none', 'facecolor', color.label{l}, 'facealpha', 0.5); % , 'facealpha', 0.5
