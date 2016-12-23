@@ -46,12 +46,18 @@ end
 
 %%
 % RGB color
-color.label{1} = [165 214 167]/255;  % 1-normal     green
-color.label{2} = [199 199 199]/255;  % 2-missing    gray
-color.label{3} = [255 138 128]/255;  % 3-outlier    orange
-color.label{4} = [239 83 80]/255;    % 4-outrange   red
-color.label{5} = [186 104 200]/255;  % 5-drift      purple
-color.label{6} = [66 165 245]/255;   % 6-trend      blue
+color.label{1} = [129 199 132]/255;  % 1-normal     green
+color.label{2} = [168 168 168]/255;  % 2-missing    gray
+color.label{3} = [255 112 67]/255;  % 3-outlier    orange
+color.label{4} = [244 67 54]/255;    % 4-outrange   red
+color.label{5} = [171 71 188]/255;  % 5-drift      purple
+color.label{6} = [33 150 243]/255;   % 6-trend      blue
+% color.label{1} = [165 214 167]/255;  % 1-normal     green
+% color.label{2} = [199 199 199]/255;  % 2-missing    gray
+% color.label{3} = [255 138 128]/255;  % 3-outlier    orange
+% color.label{4} = [239 83 80]/255;    % 4-outrange   red
+% color.label{5} = [186 104 200]/255;  % 5-drift      purple
+% color.label{6} = [66 165 245]/255;   % 6-trend      blue
 color.axis = [107 107 107]/255;
 
 figure
