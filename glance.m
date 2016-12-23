@@ -47,6 +47,7 @@ for day = dayStart : dayEnd
         set(gca,'Units','normalized', 'Position',[0 0 1 1]);  % control axis's position in figure
         set(gca,'visible','off');
         xlim([0 size(sensorData,1)]);
+        set(gcf,'color','white');
         
         img = getframe(gcf);
         img = imresize(img.cdata, [100 100]);  % expected dimension

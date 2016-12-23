@@ -21,7 +21,8 @@ function [label, labelCount, dateVec, dateSerial] = classifier(pathRead, sensorN
 %   2016/12/19  
 
 for l = 1:6
-    pathSaveNet{l} = [pathSave{s} sprintf('/sensor%02d/', sensorNum) labelName{l} '/neuralNet'];
+    pathSaveType{l} = [pathSave sprintf('/sensor%02d/', sensorNum) labelName{l}];
+    pathSaveNet{l} = [pathSaveType{l} '/neuralNet'];
     if ~exist(pathSaveNet{l},'dir'), mkdir(pathSaveNet{l}); end
 end
 
@@ -53,6 +54,7 @@ for day = dayStart : dayEnd
         set(gca,'Units','normalized', 'Position',[0 0 1 1]);  % control axis's position in figure
         set(gca,'visible','off');
         xlim([0 size(sensorData,1)]);
+        set(gcf,'color','white');
         
         img = getframe(gcf);
         img = imresize(img.cdata, [100 100]);  % expected dimension
@@ -71,7 +73,7 @@ for day = dayStart : dayEnd
         [hours, mins, secs] = sec2hms(tRemain);
         fprintf('\nSensor-%02d  %d-%02d-%02d  %02d:00-%02d:00  %s', ...
             sensorNum, dateVec(count,1), dateVec(count,2), dateVec(count,3), ...
-            hour, hour+1, labelName(label(count)))
+            hour, hour+1, labelName{label(count)})
         fprintf('\nTotal: %d  Now: %d  ', hourTotal, count)
         fprintf('About %02dh%02dm%05.2fs left.\n', hours, mins, secs)
         count = count+1;
@@ -85,7 +87,7 @@ for l = 1:6
 end
 
 for l = 1:6
-    if isempty(ls(pathSaveNet{l})), rmdir(pathSaveNet{l}); end
+    if isempty(ls(pathSaveNet{l})), rmdir(pathSaveType{l}, 's'); end
 end
 
 close all
