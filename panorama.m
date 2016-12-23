@@ -1,4 +1,4 @@
-function panorama(xSerial, yLabel)
+function panorama(xSerial, yLabel, yStr)
 % DESCRIPTION:
 %   This is a subfunction for spp.m, to plot a panorama about data quality.
 %   Green is for good, red is for bad. Time precision is hour, which means
@@ -94,7 +94,7 @@ ax.XTickLabelRotation = 12;  % rotation
 ax.XColor = color.axis;
 ax.YColor = color.axis;
 ax.YTick = [];
-ax.YLabel.String = 'Condition';
+ax.YLabel.String = yStr;
 ax.YLabel.FontSize = 16;
 
 %% size control

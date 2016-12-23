@@ -481,7 +481,7 @@ end
 
 % plot panorama
 for s = sensor.num
-    panorama(sensor.date.serial{s}, sensor.label.neuralNet{s});
+    panorama(sensor.date.serial{s}, sensor.label.neuralNet{s}, sprintf('Sensor%02d', s));
     dirName.panorama{s} = [sprintf('sensor_%02d_%s--%s', s, date.start, date.end) '_anomalyDetectionPanorama.png'];
     saveas(gcf,[dirName.home '/' dirName.panorama{s}]);
     fprintf('\nSenor-%02d anomaly detection panorama file location:\n%s\n', ...
