@@ -86,8 +86,13 @@ for l = 1:8
     labelCount{l,1} = find(label == l); % pass to sensor.count{l,s}
 end
 
+dot = '.. .';
 for l = 1:8
-    if isempty(ls(pathSaveNet{l})), rmdir(pathSaveType{l}, 's'); end
+    check = ls(pathSaveNet{l});
+    if ispc
+        for n = 1:4, check(1) = []; end
+    end
+    if isempty(check), rmdir(pathSaveType{l}, 's'); end
 end
 
 close all
