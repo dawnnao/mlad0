@@ -2,15 +2,15 @@ clear;clc;close all;
 
 pathRoot = '/Volumes/midDisk/hangzhouwan-2016Q1-tidy/netmanager_b';
 
-sensorNum = [27 28];
-dateStart = '2016-01-31';
-dateEnd = '2016-02-01';
-sensorTrainRatio = 30/100;
+sensorNum = [1 2];
+dateStart = '2016-01-01';
+dateEnd = '2016-01-02';
+sensorTrainRatio = 100/100;
 sensorPSize = 10;
-step = [3];
+step = [2];
 
 %%
-sensor = ad(pathRoot,sensorNum,dateStart,dateEnd,sensorTrainRatio,sensorPSize, step);
+sensor = adi(pathRoot,sensorNum,dateStart,dateEnd,sensorTrainRatio,sensorPSize, step);
 
 % sensor = pspp([], sensorNum, dateStart, dateEnd, sensorTrainRatio, sensorPSize, step);
 
