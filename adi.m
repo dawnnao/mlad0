@@ -215,7 +215,7 @@ while goNext == 0
     for s = sensor.num
         sensor.label.manual{s} = zeros(8,hourTotal);
         % manually label
-        sensor.trainSetSize(s) = floor(sensor.trainRatio(s) * hourTotal);
+        sensor.trainSetSize(s) = ceil(sensor.trainRatio(s) * hourTotal);
         figure
         n = 1;
         while n <= sensor.trainSetSize(s)
@@ -226,6 +226,7 @@ while goNext == 0
             
             if ~exist(random.path, 'file')
                 fprintf('\nCAUTION:\n%s\nNo such file! Filled with a zero.\n', random.path)
+                sensor.data{s}(1, sensor.random(n)) = zeros;
             else
                 read = ['load(''' random.path ''');']; eval(read);
                 sensor.data{s}(:, sensor.random(n)) = data(:, s);
