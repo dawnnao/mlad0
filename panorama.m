@@ -1,4 +1,4 @@
-function panorama(xSerial, yLabel, yStr)
+function p = panorama(xSerial, yLabel, yStr)
 % DESCRIPTION:
 %   This is a subfunction for spp.m, to plot a panorama about data quality.
 %   Green is for good, red is for bad. Time precision is hour, which means
@@ -56,7 +56,7 @@ color.label{7} = [255 235 59]/255;   % 7-bias       yellow
 color.label{8} = [168 168 168]/255;  % 8-cutoff     gray
 color.axis = [107 107 107]/255;
 
-figure
+p = figure;
 for l = 1:8
     for n = 1:3
         area(plotx, plotyTri{n}(l,:), ...
@@ -102,7 +102,7 @@ ax.YLabel.FontSize = 16;
 %% size control
 fig = gcf;
 fig.Units = 'normalized';
-fig.Position = [0 0.85 1 0.15];  % control figure's position
+fig.Position = [0 0.75 1 0.15];  % control figure's position
 % set(gcf,'color','w');
 fig.Color = 'w';
 ax.Units = 'normalized';

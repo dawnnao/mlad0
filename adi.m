@@ -368,8 +368,8 @@ if isempty(step)
         else fprintf('Invalid input! Please re-input.\n')
         end
     end
-elseif step == 1, fprintf('\nFinish.\n'), return
-elseif ismember(2, step), fprintf('\n%s\n\n\n', tail)
+elseif step == 2, fprintf('\nFinish.\n'), return
+elseif ismember(3, step), fprintf('\n%s\n\n\n', tail)
 end
 pause(0.5)
 clear head tail savePath
@@ -401,7 +401,7 @@ if ~isempty(step) && step(1) == 3
     clear newP
 end
 t(3) = tic;
-
+fprintf('\nTraining...\n')
 dirName.formatIn = 'yyyy-mm-dd';
 date.serial.start = datenum(date.start, dirName.formatIn);  % day numbers from year 0000
 date.serial.end   = datenum(date.end, dirName.formatIn);
@@ -477,6 +477,7 @@ for s = sensor.num(2:end)
 end
 
 % classification
+fprintf('\nDetecting...\n')
 for s = sensor.num
     [sensor.label.neuralNet{s}, sensor.count{l,s}, sensor.date.vec{s}, sensor.date.serial{s}] = ...
         classifier(pathRoot, s, date.serial.start, date.serial.end, dirName.home, sensor.label.name, sensor.neuralNet{s});
@@ -489,8 +490,8 @@ for s = sensor.num
     saveas(gcf,[dirName.home '/' dirName.panorama{s}]);
     fprintf('\nSenor-%02d anomaly detection panorama file location:\n%s\n', ...
         s, GetFullPath([dirName.home '/' dirName.panorama{s}]))
-    fprintf('\nPress anykey to continue.\n')
-    pause
+%     fprintf('\nPress anykey to continue.\n')
+    pause(1.5)
     close
     % update sensor.status
     sensor.status{s}(2,3) = {1};
@@ -509,8 +510,8 @@ for s = sensor.num
     saveas(gcf,[dirName.home '/' dirName.statsPerSensor{s}]);
     fprintf('\nSenor-%02d anomaly stats bar-plot file location:\n%s\n', ...
         s, GetFullPath([dirName.home '/' dirName.statsPerSensor{s}]))
-    fprintf('\nPress anykey to continue.\n')
-    pause
+%     fprintf('\nPress anykey to continue.\n')
+    pause(1.5)
     close
 end
 
@@ -528,8 +529,8 @@ for l = 1 : 8
         saveas(gcf,[dirName.home '/' dirName.statsPerLabel{l}]);
         fprintf('\n%s anomaly stats bar-plot file location:\n%s\n', ...
             sensor.label.name{l}, GetFullPath([dirName.home '/' dirName.statsPerLabel{l}]))
-        fprintf('\nPress anykey to continue.\n')
-        pause
+%         fprintf('\nPress anykey to continue.\n')
+        pause(1.5)
         close
     end
 end
@@ -558,8 +559,8 @@ if isempty(step)
         else fprintf('Invalid input! Please re-input.\n')
         end
     end
-elseif step == 1, fprintf('\nFinish.\n'), return
-elseif ismember(2, step), fprintf('\n%s\n\n\n', tail)
+elseif step == 3, fprintf('\nFinish.\n'), return
+elseif ismember(4, step), fprintf('\n%s\n\n\n', tail)
 end
 pause(0.5)
 clear head tail savePath

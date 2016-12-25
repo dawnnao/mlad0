@@ -1,4 +1,4 @@
-function monthStatsPerLabel(stats, labelNum, labelName)
+function f = monthStatsPerLabel(stats, labelNum, labelName)
 
 color= {[129 199 132]/255;
         [244 67 54]/255;  
@@ -9,7 +9,7 @@ color= {[129 199 132]/255;
         [255 235 59]/255; 
         [168 168 168]/255};
 
-figure
+f = figure;
 h = bar3(stats);
 xlabel('Sensor');
 ylabel('Month');
@@ -20,6 +20,6 @@ for n = 1 : size(stats, 2)
     set(h(n),'FaceColor', color{labelNum});
 end
 set(h, 'EdgeColor', [107 107 107]/255);
-set(gca, 'fontsize', 10)
+set(gca, 'fontsize', 7)
 
 end
