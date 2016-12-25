@@ -108,8 +108,8 @@ fig.Color = 'w';
 ax.Units = 'normalized';
 ax.Position = [0.055 0.25 0.94 0.72];  % control ax's position in figure
 
-fprintf('\nPanorama''s legend:\ngreen-normal   gray-missing   orange-outlier\n')
-fprintf('red-outrange   purple-drift   blue-trend\n')
+fprintf('\n\nPanorama''s legend:\ngreen-normal    red-outlier    brown-square    orange-missing\n')
+fprintf('blue-trend      purple-drift   yellow-bias     gray-cutoff\n\n')
 end
 
 

@@ -43,7 +43,8 @@ for day = dayStart : dayEnd
         end
 %         set(gcf, 'visible', 'off');
         plot(sensorData(:, 1),'color','k');
-        set(gcf,'Units','pixels','Position',[100 100 100 100]);  % control figure's position
+        position = get(gcf,'Position');
+        set(gcf,'Units','pixels','Position',[position(1), position(2), 100, 100]);  % control figure's position
         set(gca,'Units','normalized', 'Position',[0 0 1 1]);  % control axis's position in figure
         set(gca,'visible','off');
         xlim([0 size(sensorData,1)]);

@@ -50,7 +50,8 @@ for day = dayStart : dayEnd
         end
 %         set(gcf, 'visible', 'off');
         plot(sensorData(:, 1),'color','k');
-        set(gcf,'Units','pixels','Position',[100 100 100 100]);  % control figure's position
+        position = get(gcf,'Position');
+        set(gcf,'Units','pixels','Position',[position(1), position(2), 100, 100]);  % control figure's position
         set(gca,'Units','normalized', 'Position',[0 0 1 1]);  % control axis's position in figure
         set(gca,'visible','off');
         xlim([0 size(sensorData,1)]);
@@ -86,12 +87,9 @@ for l = 1:8
     labelCount{l,1} = find(label == l); % pass to sensor.count{l,s}
 end
 
-dot = '.. .';
 for l = 1:8
     check = ls(pathSaveNet{l});
-    if ispc
-        for n = 1:4, check(1) = []; end
-    end
+    if ispc, check(1:4) = []; end
     if isempty(check), rmdir(pathSaveType{l}, 's'); end
 end
 
