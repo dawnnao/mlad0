@@ -1,4 +1,4 @@
-function [label, labelCount, dateVec, dateSerial] = classifier(pathRead, sensorNum, dayStart, dayEnd, pathSave, labelName, neuralNet)
+function [label, labelCount, dateVec, dateSerial] = classifierSingle(pathRead, sensorNum, dayStart, dayEnd, pathSave, labelName, neuralNet)
 % DESCRIPTION:
 %   This is a subfunction of pspp.m, to read user specified data, and
 %   display progress in command window.
@@ -39,7 +39,7 @@ for day = dayStart : dayEnd
         dateVec(count,:) = datevec(string,'dd-mmm-yyyy');
         dateVec(count,4) = hour;
         dateSerial(count,1) = datenum(dateVec(count,:));
-        path.folder = sprintf('%04d-%02d-%02d',dateVec(count,1),dateVec(count,2), dateVec(count,3));
+        path.folder = sprintf('%04d-%02d-%02d',dateVec(count,1), dateVec(count,2), dateVec(count,3));
         path.file = [path.folder sprintf(' %02d-VIB.mat',hour)];
         path.full = [path.root '/' path.folder '/' path.file];
         if ~exist(path.full, 'file')

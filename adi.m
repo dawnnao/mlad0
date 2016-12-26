@@ -217,7 +217,6 @@ if exist(dirName.mat,'dir')
 elseif ~exist(dirName.mat,'dir'), mkdir(dirName.mat);
 end
 
-t(2) = tic;
 dirName.formatIn = 'yyyy-mm-dd';
 date.serial.start = datenum(date.start, dirName.formatIn);  % day numbers from year 0000
 date.serial.end   = datenum(date.end, dirName.formatIn);
@@ -230,6 +229,7 @@ while goNext == 0
     rng(seed,'twister');
     sensor.random = randperm(hourTotal);
     for s = sensor.num
+        t(2) = tic;
         sensor.label.manual{s} = zeros(8,hourTotal);
         % manually label
         sensor.trainSetSize(s) = ceil(sensor.trainRatio(s) * hourTotal);
@@ -292,7 +292,7 @@ while goNext == 0
 %             if ~exist(dirName.label.net{l,s},'dir'), mkdir(dirName.label.net{l,s}); end
 %         end
         
-        ticRemain = tic;
+%         ticRemain = tic;
         c = 0; % total count initialize
         for l = 1 : 8
             % find label and corresponding data
@@ -325,10 +325,10 @@ while goNext == 0
                 % imshow(img)
                 imwrite(img,[dirName.label.manual{l,s} sprintf('/%s_', sensor.label.name{l}) num2str(count.label{l,s}(n)) '.png']);
                 manual.label{l}.image{s}(:,n) = img(:);
-                tocRemain = toc(ticRemain);
-                tRemain = tocRemain * (sensor.trainSetSize(s)*length(sensor.num) - c) / c;
-                [hours, mins, secs] = sec2hms(tRemain);
-                fprintf('About %02dh%02dm%05.2fs left.\n', hours, mins, secs)
+%                 tocRemain = toc(ticRemain);
+%                 tRemain = tocRemain * (sensor.trainSetSize(s)*length(sensor.num) - c) / c;
+%                 [hours, mins, secs] = sec2hms(tRemain);
+%                 fprintf('About %02dh%02dm%05.2fs left.\n', hours, mins, secs)
             end
             close
             clear img
@@ -363,11 +363,11 @@ while goNext == 0
         if exist(dirName.matPart{s}, 'file'), delete(dirName.matPart{s}); end
         fprintf('\nSaving sensor-%02d training set...\nLocation: %s\n', s, dirName.matPart{s})
         save(dirName.matPart{s}, 'labelTemp', 'manualTemp', 'countTemp', '-v7.3')
+        
+        elapsedTime(2) = toc(t(2));
+        [hours, mins, secs] = sec2hms(elapsedTime(2));
+        fprintf('\nSensor-%02d training set making time consumption: %02dh%02dm%05.2fs\n\n\n\n', s, hours, mins, secs)
     end
-    
-    elapsedTime(2) = toc(t(2));
-    [hours, mins, secs] = sec2hms(elapsedTime(2));
-    fprintf('\nYou used %02d:%02d:%05.2f to label data.\n', hours, mins, secs)
     
     sensor = rmfield(sensor, 'random');
     goNext = 1;
@@ -463,7 +463,7 @@ if ~isempty(step) && step(1) == 3
     clear newP
 end
 t(3) = tic;
-fprintf('\nTraining...\n')
+fprintf('\nData combining...\n')
 dirName.formatIn = 'yyyy-mm-dd';
 date.serial.start = datenum(date.start, dirName.formatIn);  % day numbers from year 0000
 date.serial.end   = datenum(date.end, dirName.formatIn);
@@ -482,6 +482,7 @@ for s = sensor.num
     end
 end
 
+fprintf('\nTraining...\n')
 % randomization
 seed = 1;
 rng(seed,'twister');
@@ -539,10 +540,22 @@ end
 
 % classification
 fprintf('\nDetecting...\n')
+% for s = sensor.num
+%     [sensor.label.neuralNet{s}, sensor.count{l,s}, sensor.date.vec{s}, sensor.date.serial{s}] = ...
+%         classifierSingle(pathRoot, s, date.serial.start, date.serial.end, dirName.home, sensor.label.name, sensor.neuralNet{s});
+% end
+
+
+
+[sensor.label.neuralNet, sensor.count, dateVec, dateSerial] = ...
+    classifierMulti(pathRoot, sensor.num, date.serial.start, date.serial.end, ...
+    dirName.home, sensor.label.name, sensor.neuralNet{sensor.num(1)});
+
 for s = sensor.num
-    [sensor.label.neuralNet{s}, sensor.count{l,s}, sensor.date.vec{s}, sensor.date.serial{s}] = ...
-        classifier(pathRoot, s, date.serial.start, date.serial.end, dirName.home, sensor.label.name, sensor.neuralNet{s});
+    sensor.date.vec{s} = dateVec;
+    sensor.date.serial{s} = dateSerial;
 end
+
 
 % plot panorama
 dirName.plotPano = [dirName.home '/plot/panorama'];
