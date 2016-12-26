@@ -31,6 +31,7 @@ hourTotal = (dayEnd-dayStart+1)*24;
 label = zeros(hourTotal,1);
 count = 1;
 figure
+set(gcf,'Units','pixels','Position',[1180, 70, 100, 100]);
 for day = dayStart : dayEnd
     string = datestr(day);
     for hour = 0:23

@@ -1,4 +1,4 @@
-function p = panorama(xSerial, yLabel, yStr)
+function p = panorama(xSerial, yLabel, yStr, legendColor)
 % DESCRIPTION:
 %   This is a subfunction for spp.m, to plot a panorama about data quality.
 %   Green is for good, red is for bad. Time precision is hour, which means
@@ -21,6 +21,9 @@ function p = panorama(xSerial, yLabel, yStr)
 % 
 % DATE CREATED:
 %   2016/12/10
+
+%% pass variable(s)
+color.label = legendColor;
 
 %%
 interval = xSerial(end) - xSerial(end-1);
@@ -46,14 +49,24 @@ end
 
 %%
 % RGB color
-color.label{1} = [129 199 132]/255;  % 1-normal     green
-color.label{2} = [244 67 54]/255;    % 2-outlier    red
-color.label{3} = [121 85 72]/255;    % 3-square     brown
-color.label{4} = [255 112 67]/255;   % 4-missing    orange
-color.label{5} = [33 150 243]/255;   % 5-trend      blue
-color.label{6} = [171 71 188]/255;   % 6-drift      purple
-color.label{7} = [255 235 59]/255;   % 7-bias       yellow
-color.label{8} = [168 168 168]/255;  % 8-cutoff     gray
+color.label =  {[129 199 132]/255;  % 1-normal     green
+                [244 67 54]/255;    % 2-outlier    red
+                [121 85 72]/255;    % 3-square     brown
+                [255 112 67]/255;   % 4-missing    orange
+                [33 150 243]/255;   % 5-trend      blue
+                [171 71 188]/255;   % 6-drift      purple
+                [255 235 59]/255;   % 7-bias       yellow
+                [168 168 168]/255}; % 8-cutoff     gray
+
+% color.label{1} = [129 199 132]/255;  % 1-normal     green
+% color.label{2} = [244 67 54]/255;    % 2-outlier    red
+% color.label{3} = [121 85 72]/255;    % 3-square     brown
+% color.label{4} = [255 112 67]/255;   % 4-missing    orange
+% color.label{5} = [33 150 243]/255;   % 5-trend      blue
+% color.label{6} = [171 71 188]/255;   % 6-drift      purple
+% color.label{7} = [255 235 59]/255;   % 7-bias       yellow
+% color.label{8} = [168 168 168]/255;  % 8-cutoff     gray
+
 color.axis = [107 107 107]/255;
 
 p = figure;

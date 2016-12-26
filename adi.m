@@ -95,9 +95,19 @@ for n = 1 : length(sensor.num)
 end
 sensor.pSize = sensorPSize;
 
+%% common variables
+sensor.label.name = {'1-normal','2-outlier','3-square','4-missing','5-trend','6-drift','7-bias','8-cutoff'};
+color= {[129 199 132]/255;
+        [244 67 54]/255;  
+        [121 85 72]/255;  
+        [255 112 67]/255; 
+        [33 150 243]/255; 
+        [171 71 188]/255; 
+        [255 235 59]/255; 
+        [168 168 168]/255};
+
 %% 0 generate file and folder names
 sensorStr = tidyName(abbr(sensor.num));
-sensor.label.name = {'1-normal','2-outlier','3-square','4-missing','5-trend','6-drift','7-bias','8-cutoff'};
 
 dirName.home = sprintf('%s--%s_sensor%s', date.start, date.end, sensorStr);
 dirName.file = [dirName.home '.mat'];
@@ -224,6 +234,7 @@ while goNext == 0
         % manually label
         sensor.trainSetSize(s) = ceil(sensor.trainRatio(s) * hourTotal);
         figure
+        set(gcf,'Units','pixels','Position',[100, 100, 300, 300]);
         n = 1;
         while n <= sensor.trainSetSize(s)
             sensor.label.manual{s}(:,sensor.random(n)) = zeros(8,1);  % initialize for re-label if necessary
@@ -537,7 +548,7 @@ end
 dirName.plotPano = [dirName.home '/plot/panorama'];
 if ~exist(dirName.plotPano, 'dir'), mkdir(dirName.plotPano); end
 for s = sensor.num
-    panorama(sensor.date.serial{s}, sensor.label.neuralNet{s}, sprintf('Sensor%02d', s));
+    panorama(sensor.date.serial{s}, sensor.label.neuralNet{s}, sprintf('Sensor%02d', s), color);
     dirName.panorama{s} = [sprintf('%s--%s_sensor_%02d', date.start, date.end, s) '_anomalyDetectionPanorama.png'];
     saveas(gcf,[dirName.plotPano '/' dirName.panorama{s}]);
     fprintf('\nSenor-%02d anomaly detection panorama file location:\n%s\n', ...
@@ -559,7 +570,7 @@ for s = sensor.num
             sensor.statsPerSensor{s}(n, l) = length(find(sensor.label.neuralNet{s}(aim) == l));
         end
     end
-    monthStatsPerSensor(sensor.statsPerSensor{s}, s, sensor.label.name);
+    monthStatsPerSensor(sensor.statsPerSensor{s}, s, sensor.label.name, color);
     dirName.statsPerSensor{s} = [sprintf('%s--%s_sensor_%02d', date.start, date.end, s) '_anomalyStats.png'];
     saveas(gcf,[dirName.plotSPS '/' dirName.statsPerSensor{s}]);
     fprintf('\nSenor-%02d anomaly stats bar-plot file location:\n%s\n', ...
@@ -580,8 +591,9 @@ for l = 1 : 8
        end
    end
    if sum(sum(sensor.statsPerLabel{l})) > 0
-        monthStatsPerLabel(sensor.statsPerLabel{l}, l, sensor.label.name{l});
-        dirName.statsPerLabel{l} = [sprintf('%s--%s_sensor%s_%s', date.start, date.end, sensorStr, sensor.label.name{l}) '_anomalyStats.png'];
+        monthStatsPerLabel(sensor.statsPerLabel{l}, l, sensor.label.name{l}, color);
+        dirName.statsPerLabel{l} = [sprintf('%s--%s_sensor%s_anomalyStats_%s.png', ...
+            date.start, date.end, sensorStr, sensor.label.name{l})];
         saveas(gcf,[dirName.plotSPT '/' dirName.statsPerLabel{l}]);
         fprintf('\n%s anomaly stats bar-plot file location:\n%s\n', ...
             sensor.label.name{l}, GetFullPath([dirName.plotSPT '/' dirName.statsPerLabel{l}]))
@@ -590,6 +602,53 @@ for l = 1 : 8
         close
     end
 end
+
+% plot sensor-type bar stats
+dirName.plotSum = [dirName.home '/plot/statsSumUp'];
+if ~exist(dirName.plotSum, 'dir'), mkdir(dirName.plotSum); end
+for s = sensor.num
+   for l = 1 : 8
+       statsSum(s, l) = length(find(sensor.label.neuralNet{s} == l));
+   end
+end
+
+figure
+h = bar(statsSum, 'stacked');
+xlabel('Sensor');
+ylabel('Count (hours)');
+legend(sensor.label.name);
+lh=findall(gcf,'tag','legend');
+set(lh,'location','northeastoutside');
+title(sprintf('%s--%s', date.start, date.end));
+grid on
+for n = 1 : 8
+    set(h(n),'FaceColor', color{n});
+end
+set(gca, 'fontsize', 12);
+
+dirName.statsSum = sprintf('%s--%s_sensor%s_anomalyStats.png', ...
+    date.start, date.end, sensorStr);
+saveas(gcf,[dirName.plotSum '/' dirName.statsSum]);
+fprintf('\nSum-up anomaly stats image file location:\n%s\n', ...
+    GetFullPath([dirName.plotSum '/' dirName.statsSum]))
+pause(1.5)
+close
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 elapsedTime(3) = toc(t(3)); [hours, mins, secs] = sec2hms(elapsedTime(3));
 fprintf('\n\n\nSTEP3:\nAnomaly detection completes, using %02dh%02dm%05.2fs .\n', ...

@@ -24,6 +24,7 @@ path.root = pathRead;
 hourTotal = (dayEnd-dayStart+1)*24;
 count = 1;
 figure
+set(gcf,'Units','pixels','Position',[100, 100, 100, 100]);
 for day = dayStart : dayEnd
     string = datestr(day);
     for hour = 0:23
