@@ -790,8 +790,11 @@ close
 % update sensor.status
 sensor.status{s}(2,4) = {1};
 fprintf('\nSaving results...\nLocation: %s\n', GetFullPath(dirName.home))
+t(5) = tic;
 if exist([dirName.home '/' dirName.file], 'file'), delete([dirName.home '/' dirName.file]); end
 save([dirName.home '/' dirName.file])
+elapsedTime(5) = toc(t(5)); [hours, mins, secs] = sec2hms(elapsedTime(1));
+fprintf('\nTime consumption: %02dh%02dm%05.2fs .\n', hours, mins, secs)
 fprintf('\nFinish!\n')
 close all
 end
