@@ -89,16 +89,24 @@ for n = 1 : length(plotx)
         bigTick(n) = 0.14;
     end
     
-    if length(plotx) <= 24*31 && mod(n,24) == 1
+    if length(plotx) <= 24+1 && mod(n,6) == 1
+        xLabel{n} = datestr(plotx(n), 'mm-dd ddd HH:MM');
+    end
+    
+    if length(plotx) > 24+1 && length(plotx) <= 24*7+1 && mod(n,12) == 1
+        xLabel{n} = datestr(plotx(n), 'mm-dd ddd HH:MM');
+    end
+    
+    if length(plotx) > 24*7+1 &&  length(plotx) <= 24*31+1 && mod(n,24) == 1
         bigTick(n) = 0.2;
         xLabel{n} = datestr(plotx(n), 'mm-dd ddd HH:MM');
     end
     
-    if length(plotx) > 24*31 && length(plotx) <= 24*31*3 && mod(n,24*7) == 1
+    if length(plotx) > 24*31+1 && length(plotx) <= 24*31*3+1 && mod(n,24*7) == 1
         xLabel{n} = datestr(plotx(n), 'mm-dd ddd HH:MM');
     end
     
-    if length(plotx) > 24*31*3 && mod(n,24*7*2) == 1
+    if length(plotx) > 24*31*3+1 && mod(n,24*7*2) == 1
         xLabel{n} = datestr(plotx(n), 'mm-dd ddd HH:MM');
     end
 end
