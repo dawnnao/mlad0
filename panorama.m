@@ -29,9 +29,9 @@ color.label = legendColor;
 interval = xSerial(end) - xSerial(end-1);
 plotx = [xSerial; xSerial(end)+interval];
 
-ploty = zeros(9, size(yLabel, 2));
+ploty = zeros(length(legendColor), size(yLabel, 2));
 
-for l = 1:9
+for l = 1:length(legendColor)
     ploty(l, find(yLabel == l)) = 1;
 end
 
@@ -40,8 +40,8 @@ for n = 1:3
     plotyTri{n} = ploty;  % intiallize
     plotyTri{n}(:, zeroSet(n,1):3:end) = 0;
     plotyTri{n}(:, zeroSet(n,2):3:end) = 0;
-    plotyTempa = [plotyTri{n} zeros(9,1)];
-    plotyTempb = [zeros(9,1) plotyTri{n}];  % move one point to right
+    plotyTempa = [plotyTri{n} zeros(length(legendColor),1)];
+    plotyTempb = [zeros(length(legendColor),1) plotyTri{n}];  % move one point to right
     plotyTri{n} = plotyTempa + plotyTempb;  % combine
     plotyTri{n}(find(plotyTri{n} == 0)) = NaN;
     clear plotyTempa plotyTempb
@@ -70,7 +70,7 @@ end
 color.axis = [107 107 107]/255;
 
 p = figure;
-for l = 1:9
+for l = 1:length(legendColor)
     for n = 1:3
         area(plotx, plotyTri{n}(l,:), ...
             'edgecolor', 'none', 'facecolor', color.label{l}, 'facealpha', 0.5); % , 'facealpha', 0.5

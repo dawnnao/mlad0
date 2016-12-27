@@ -23,7 +23,7 @@ function [label, labelCount, dateVec, dateSerial] = classifierMulti(pathRead, se
 path.root = pathRead;
 hourTotal = (dayEnd-dayStart+1)*24;
 for s = sensorNum
-    for l = 1 : 9
+    for l = 1 : length(labelName)
         pathSaveType{s,l} = [pathSave sprintf('/sensor%02d/', s) labelName{l}];
         pathSaveNet{s,l} = [pathSaveType{s,l} '/neuralNet'];
         if ~exist(pathSaveNet{s,l},'dir'), mkdir(pathSaveNet{s,l}); end
@@ -94,7 +94,7 @@ end
 count = count-1;
 
 for s = sensorNum
-    for l = 1:9
+    for l = 1 : length(labelName)
         labelCount{l,s} = find(label{s} == l); % pass to sensor.count{l,s}
         check = ls(pathSaveNet{s,l});
         if ispc, check(1:4) = []; end
@@ -102,7 +102,7 @@ for s = sensorNum
     end
 end
 
-% for l = 1:9
+% for l = 1:length(labelName)
 %     check = ls(pathSaveNet{l});
 %     if ispc, check(1:4) = []; end
 %     if isempty(check), rmdir(pathSaveType{l}, 's'); end

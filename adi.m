@@ -106,6 +106,7 @@ color= {[129 199 132]/255;    % 1-normal     green
         [255 235 59]/255;     % 7-bias       yellow
         [168 168 168]/255;    % 8-cutoff     gray
         [50 50 50]/255};      % 9-square     black    
+labelNum = length(sensor.label.name);
 
 %% 0 generate file and folder names
 sensorStr = tidyName(abbr(sensor.num));
@@ -231,14 +232,14 @@ while goNext == 0
     sensor.random = randperm(hourTotal);
     for s = sensor.num
         t(2) = tic;
-        sensor.label.manual{s} = zeros(9,hourTotal);
+        sensor.label.manual{s} = zeros(labelNum,hourTotal);
         % manually label
         sensor.trainSetSize(s) = ceil(sensor.trainRatio(s) * hourTotal);
         figure
         set(gcf,'Units','pixels','Position',[100, 100, 300, 300]);
         n = 1;
         while n <= sensor.trainSetSize(s)
-            sensor.label.manual{s}(:,sensor.random(n)) = zeros(9,1);  % initialize for re-label if necessary
+            sensor.label.manual{s}(:,sensor.random(n)) = zeros(labelNum,1);  % initialize for re-label if necessary
             
             [random.date, random.hour] = colLocation(sensor.random(n), date.start);
             random.path = [pathRoot '/' random.date '/' random.date sprintf(' %02d-VIB.mat',random.hour)];
@@ -262,7 +263,7 @@ while goNext == 0
             prompt = '\nInput: ';
             classify = input(prompt,'s');
             classify = str2double(classify);  % filter charactor input
-            if classify <= 9 && classify >= 1
+            if classify <= labelNum && classify >= 1
                 sensor.label.manual{s}(classify,sensor.random(n)) = 1;
                 n = n + 1;
             elseif classify == 0
@@ -278,13 +279,13 @@ while goNext == 0
         close
         
 %         % find label and corresponding data
-%         for l = 1 : 9
+%         for l = 1 : labelNum
 %             count.label{l,s} = find(sensor.label.manual{s}(l,:));
 %             manual.label{l}.data{s} = sensor.data{s}(:,count.label{l,s});
 %         end
         
 %         % generate all folders
-%         for l = 1 : 9
+%         for l = 1 : labelNum
 %             count.label{l,s} = find(sensor.label.manual{s}(l,:));
 %             manual.label{l}.data{s} = sensor.data{s}(:,count.label{l,s});
 %             dirName.label.manual{l,s} = [dirName.sensor{s} '/' sensor.label.name{l} '/manual'];
@@ -295,7 +296,7 @@ while goNext == 0
         
 %         ticRemain = tic;
         c = 0; % total count initialize
-        for l = 1 : 9
+        for l = 1 : labelNum
             % find label and corresponding data
             count.label{l,s} = find(sensor.label.manual{s}(l,:));
             manual.label{l}.data{s} = sensor.data{s}(:,count.label{l,s});
@@ -342,7 +343,7 @@ while goNext == 0
         
 %         % delete useless folder(s)
 %         dot = '.. .';
-%         for l = 1:9
+%         for l = 1:labelNum
 %             check = ls(dirName.label.manual{l,s});
 %         if ispc, check(1:4) = []; end
 %             if isempty(check), rmdir([dirName.sensor{s} '/' sensor.label.name{l}], 's'); end
@@ -350,12 +351,12 @@ while goNext == 0
         
         % pass to 'temp' suffix variables
         labelTemp = sensor.label.manual{s};
-        for l = 1 : 9
+        for l = 1 : labelNum
             manualTemp{l} = manual.label{l}.image{s};
             countTemp{l} = count.label{l,s};
         end
         % delete big and useless variables
-        for l = 1 : 9
+        for l = 1 : labelNum
             manual.label{l} = rmfield(manual.label{l}, 'data');
         end
         sensor = rmfield(sensor, 'data');
@@ -442,7 +443,7 @@ if ~isempty(step) && step(1) == 3
         else
             load(dirName.matPart{s});
             sensor.label.manual{s} = labelTemp;
-            for l = 1 : 9
+            for l = 1 : labelNum
                 manual.label{l}.image{s} = manualTemp{l};
                 count.label{l,s} = countTemp{l};
             end
@@ -477,7 +478,7 @@ feature.image = [];
 feature.label.manual = [];
 
 for s = sensor.num
-    for l = 1:9
+    for l = 1:labelNum
         feature.image = [feature.image manual.label{l}.image{s}];  % modify here!
         feature.label.manual = [feature.label.manual sensor.label.manual{s}(:,count.label{l,s})];  % modify here!
     end
@@ -579,7 +580,7 @@ dirName.plotSPS = [dirName.home '/plot/statsPerSensor'];
 if ~exist(dirName.plotSPS, 'dir'), mkdir(dirName.plotSPS); end
 for s = sensor.num
     for n = 1 : 12
-        for l = 1 : 9
+        for l = 1 : labelNum
             aim = find(sensor.date.vec{s}(:,2) == n);
             sensor.statsPerSensor{s}(n, l) = length(find(sensor.label.neuralNet{s}(aim) == l));
         end
@@ -597,7 +598,7 @@ end
 % plot anomaly space-time distribution per type
 dirName.plotSPT = [dirName.home '/plot/statsPerType'];
 if ~exist(dirName.plotSPT, 'dir'), mkdir(dirName.plotSPT); end
-for l = 1 : 9
+for l = 1 : labelNum
    for s = sensor.num
        for n = 1 : 12
            aim = find(sensor.date.vec{s}(:,2) == n);
@@ -621,13 +622,13 @@ end
 dirName.plotSum = [dirName.home '/plot/statsSumUp'];
 if ~exist(dirName.plotSum, 'dir'), mkdir(dirName.plotSum); end
 for s = sensor.num
-   for l = 1 : 9
+   for l = 1 : labelNum
        statsSum(s, l) = length(find(sensor.label.neuralNet{s} == l));
    end
 end
 
 if ~isempty(statsSum(1,1)) && size(statsSum, 1) == 1
-    statsSum(2,1:9) = 0;
+    statsSum(2,1:labelNum) = 0;
 end
 
 figure
@@ -639,7 +640,7 @@ lh=findall(gcf,'tag','legend');
 set(lh,'location','northeastoutside');
 title(sprintf('%s--%s', date.start, date.end));
 grid on
-for n = 1 : 9
+for n = 1 : labelNum
     set(h(n),'FaceColor', color{n});
 end
 set(gca, 'fontsize', 12);

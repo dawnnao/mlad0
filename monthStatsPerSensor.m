@@ -8,7 +8,7 @@ zlabel('Count (hours)');
 title(sprintf('Sensor%02d', sensor));
 legend(labelName)
 
-for n = 1 : 9
+for n = 1 : length(labelName)
     set(h(n),'FaceColor', color{n});
 end
 set(h, 'EdgeColor', [107 107 107]/255);
