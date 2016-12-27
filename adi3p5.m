@@ -559,67 +559,69 @@ if ismember(3, step) || isempty(step)
 % end
 
 % split from here ?????????????????????????????????????????????????????????
-
+labelNameTemp = sensor.label.name;
+savePath = [GetFullPath(dirName.home) '/' dirName.file];
 load(savePath)
+sensor.label.name = labelNameTemp;
 
-% plot panorama
-dirName.plotPano = [dirName.home '/plot/panorama'];
-if ~exist(dirName.plotPano, 'dir'), mkdir(dirName.plotPano); end
-for s = sensor.num
-    panorama(sensor.date.serial{s}, sensor.label.neuralNet{s}, sprintf('Sensor%02d', s), color);
-    dirName.panorama{s} = [sprintf('%s--%s_sensor_%02d', date.start, date.end, s) '_anomalyDetectionPanorama.png'];
-    saveas(gcf,[dirName.plotPano '/' dirName.panorama{s}]);
-    fprintf('\nSenor-%02d anomaly detection panorama file location:\n%s\n', ...
-        s, GetFullPath([dirName.plotPano '/' dirName.panorama{s}]))
-%     fprintf('\nPress anykey to continue.\n')
-    pause(1.5)
-    close
-    % update sensor.status
-    sensor.status{s}(2,3) = {1};
-end
+% % plot panorama
+% dirName.plotPano = [dirName.home '/plot/panorama'];
+% if ~exist(dirName.plotPano, 'dir'), mkdir(dirName.plotPano); end
+% for s = sensor.num
+%     panorama(sensor.date.serial{s}, sensor.label.neuralNet{s}, sprintf('Sensor%02d', s), color);
+%     dirName.panorama{s} = [sprintf('%s--%s_sensor_%02d', date.start, date.end, s) '_anomalyDetectionPanorama.png'];
+%     saveas(gcf,[dirName.plotPano '/' dirName.panorama{s}]);
+%     fprintf('\nSenor-%02d anomaly detection panorama file location:\n%s\n', ...
+%         s, GetFullPath([dirName.plotPano '/' dirName.panorama{s}]))
+% %     fprintf('\nPress anykey to continue.\n')
+%     pause(1.5)
+%     close
+%     % update sensor.status
+%     sensor.status{s}(2,3) = {1};
+% end
 
-% plot monthly stats per sensor
-dirName.plotSPS = [dirName.home '/plot/statsPerSensor'];
-if ~exist(dirName.plotSPS, 'dir'), mkdir(dirName.plotSPS); end
-for s = sensor.num
-    for n = 1 : 12
-        for l = 1 : labelNum
-            aim = find(sensor.date.vec{s}(:,2) == n);
-            sensor.statsPerSensor{s}(n, l) = length(find(sensor.label.neuralNet{s}(aim) == l));
-        end
-    end
-    monthStatsPerSensor(sensor.statsPerSensor{s}, s, sensor.label.name, color);
-    dirName.statsPerSensor{s} = [sprintf('%s--%s_sensor_%02d', date.start, date.end, s) '_anomalyStats.png'];
-    saveas(gcf,[dirName.plotSPS '/' dirName.statsPerSensor{s}]);
-    fprintf('\nSenor-%02d anomaly stats bar-plot file location:\n%s\n', ...
-        s, GetFullPath([dirName.plotSPS '/' dirName.statsPerSensor{s}]))
-%     fprintf('\nPress anykey to continue.\n')
-    pause(1.5)
-    close
-end
+% % plot monthly stats per sensor
+% dirName.plotSPS = [dirName.home '/plot/statsPerSensor'];
+% if ~exist(dirName.plotSPS, 'dir'), mkdir(dirName.plotSPS); end
+% for s = sensor.num
+%     for n = 1 : 12
+%         for l = 1 : labelNum
+%             aim = find(sensor.date.vec{s}(:,2) == n);
+%             sensor.statsPerSensor{s}(n, l) = length(find(sensor.label.neuralNet{s}(aim) == l));
+%         end
+%     end
+%     monthStatsPerSensor(sensor.statsPerSensor{s}, s, sensor.label.name, color);
+%     dirName.statsPerSensor{s} = [sprintf('%s--%s_sensor_%02d', date.start, date.end, s) '_anomalyStats.png'];
+%     saveas(gcf,[dirName.plotSPS '/' dirName.statsPerSensor{s}]);
+%     fprintf('\nSenor-%02d anomaly stats bar-plot file location:\n%s\n', ...
+%         s, GetFullPath([dirName.plotSPS '/' dirName.statsPerSensor{s}]))
+% %     fprintf('\nPress anykey to continue.\n')
+%     pause(1.5)
+%     close
+% end
 
-% plot anomaly space-time distribution per type
-dirName.plotSPT = [dirName.home '/plot/statsPerType'];
-if ~exist(dirName.plotSPT, 'dir'), mkdir(dirName.plotSPT); end
-for l = 1 : labelNum
-   for s = sensor.num
-       for n = 1 : 12
-           aim = find(sensor.date.vec{s}(:,2) == n);
-           sensor.statsPerLabel{l}(n, s) = length(find(sensor.label.neuralNet{s}(aim) == l));
-       end
-   end
-   if sum(sum(sensor.statsPerLabel{l})) > 0
-        monthStatsPerLabel(sensor.statsPerLabel{l}, l, sensor.label.name{l}, color);
-        dirName.statsPerLabel{l} = [sprintf('%s--%s_sensor%s_anomalyStats_%s.png', ...
-            date.start, date.end, sensorStr, sensor.label.name{l})];
-        saveas(gcf,[dirName.plotSPT '/' dirName.statsPerLabel{l}]);
-        fprintf('\n%s anomaly stats bar-plot file location:\n%s\n', ...
-            sensor.label.name{l}, GetFullPath([dirName.plotSPT '/' dirName.statsPerLabel{l}]))
-%         fprintf('\nPress anykey to continue.\n')
-        pause(1.5)
-        close
-    end
-end
+% % plot anomaly space-time distribution per type
+% dirName.plotSPT = [dirName.home '/plot/statsPerType'];
+% if ~exist(dirName.plotSPT, 'dir'), mkdir(dirName.plotSPT); end
+% for l = 1 : labelNum
+%    for s = sensor.num
+%        for n = 1 : 12
+%            aim = find(sensor.date.vec{s}(:,2) == n);
+%            sensor.statsPerLabel{l}(n, s) = length(find(sensor.label.neuralNet{s}(aim) == l));
+%        end
+%    end
+%    if sum(sum(sensor.statsPerLabel{l})) > 0
+%         monthStatsPerLabel(sensor.statsPerLabel{l}, l, sensor.label.name{l}, color);
+%         dirName.statsPerLabel{l} = [sprintf('%s--%s_sensor%s_anomalyStats_%s.png', ...
+%             date.start, date.end, sensorStr, sensor.label.name{l})];
+%         saveas(gcf,[dirName.plotSPT '/' dirName.statsPerLabel{l}]);
+%         fprintf('\n%s anomaly stats bar-plot file location:\n%s\n', ...
+%             sensor.label.name{l}, GetFullPath([dirName.plotSPT '/' dirName.statsPerLabel{l}]))
+% %         fprintf('\nPress anykey to continue.\n')
+%         pause(1.5)
+%         close
+%     end
+% end
 
 % plot sensor-type bar stats
 dirName.plotSum = [dirName.home '/plot/statsSumUp'];
@@ -658,7 +660,11 @@ close
 
 % crop legend to panorama's folder
 img = imread([dirName.plotSum '/' dirName.statsSum]);
-imgLegend = imcrop(img, [880.5 55.5 210 284]);
+if ispc
+    imgLegend = imcrop(img, [646.5 42.5 172 264]);
+elseif ismac
+    imgLegend = imcrop(img, [660.5 42.5 160 229]);
+end
 figure, imshow(imgLegend)
 saveas(gcf, [dirName.plotPano '/legend.png']); close
 
