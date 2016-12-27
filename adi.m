@@ -626,6 +626,10 @@ for s = sensor.num
    end
 end
 
+if ~isempty(statsSum(1,1)) && size(statsSum, 1) == 1
+    statsSum(2,1:9) = 0;
+end
+
 figure
 h = bar(statsSum, 'stacked');
 xlabel('Sensor');
