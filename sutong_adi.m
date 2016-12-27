@@ -3,10 +3,10 @@ clear;clc;close all;
 pathRoot = '/Volumes/midDisk/sutong-2012-tidy';
 % pathRoot = 'G:/sutong-2012-tidy';
 
-sensorNum = [1 2];
+sensorNum = [1:38];
 dateStart = '2012-01-01';
-dateEnd = '2012-01-01';
-sensorTrainRatio = 100/100;
+dateEnd = '2012-12-31';
+sensorTrainRatio = 3/100;
 sensorPSize = 10;
 step = [2];
 

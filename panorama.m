@@ -29,9 +29,9 @@ color.label = legendColor;
 interval = xSerial(end) - xSerial(end-1);
 plotx = [xSerial; xSerial(end)+interval];
 
-ploty = zeros(8, size(yLabel, 2));
+ploty = zeros(9, size(yLabel, 2));
 
-for l = 1:8
+for l = 1:9
     ploty(l, find(yLabel == l)) = 1;
 end
 
@@ -40,8 +40,8 @@ for n = 1:3
     plotyTri{n} = ploty;  % intiallize
     plotyTri{n}(:, zeroSet(n,1):3:end) = 0;
     plotyTri{n}(:, zeroSet(n,2):3:end) = 0;
-    plotyTempa = [plotyTri{n} zeros(8,1)];
-    plotyTempb = [zeros(8,1) plotyTri{n}];  % move one point to right
+    plotyTempa = [plotyTri{n} zeros(9,1)];
+    plotyTempb = [zeros(9,1) plotyTri{n}];  % move one point to right
     plotyTri{n} = plotyTempa + plotyTempb;  % combine
     plotyTri{n}(find(plotyTri{n} == 0)) = NaN;
     clear plotyTempa plotyTempb
@@ -49,14 +49,14 @@ end
 
 %%
 % RGB color
-color.label =  {[129 199 132]/255;  % 1-normal     green
-                [244 67 54]/255;    % 2-outlier    red
-                [121 85 72]/255;    % 3-square     brown
-                [255 112 67]/255;   % 4-missing    orange
-                [33 150 243]/255;   % 5-trend      blue
-                [171 71 188]/255;   % 6-drift      purple
-                [255 235 59]/255;   % 7-bias       yellow
-                [168 168 168]/255}; % 8-cutoff     gray
+% color.label =  {[129 199 132]/255;  % 1-normal     green
+%                 [244 67 54]/255;    % 2-outlier    red
+%                 [121 85 72]/255;    % 3-square     brown
+%                 [255 112 67]/255;   % 4-missing    orange
+%                 [33 150 243]/255;   % 5-trend      blue
+%                 [171 71 188]/255;   % 6-drift      purple
+%                 [255 235 59]/255;   % 7-bias       yellow
+%                 [168 168 168]/255}; % 8-cutoff     gray
 
 % color.label{1} = [129 199 132]/255;  % 1-normal     green
 % color.label{2} = [244 67 54]/255;    % 2-outlier    red
@@ -70,7 +70,7 @@ color.label =  {[129 199 132]/255;  % 1-normal     green
 color.axis = [107 107 107]/255;
 
 p = figure;
-for l = 1:8
+for l = 1:9
     for n = 1:3
         area(plotx, plotyTri{n}(l,:), ...
             'edgecolor', 'none', 'facecolor', color.label{l}, 'facealpha', 0.5); % , 'facealpha', 0.5
@@ -86,18 +86,21 @@ xLabel = cell(size(plotx));
 bigTick = zeros(size(plotx));
 for n = 1 : length(plotx)
     if mod(n,12) == 1
-%         xLabel{n} = datestr(plotx(n), 15);
         bigTick(n) = 0.14;
     end
     
-    if mod(n,24) == 1
-        xLabel{n} = datestr(plotx(n), 'mm-dd ddd HH:MM');
+    if length(plotx) <= 24*31 && mod(n,24) == 1
         bigTick(n) = 0.2;
+        xLabel{n} = datestr(plotx(n), 'mm-dd ddd HH:MM');
     end
     
-%     if mod(n,168) == 1
-%         xLabel{n} = datestr(plotx(n), 'yyyy-mm-dd HH:MM');
-%     end
+    if length(plotx) > 24*31 && length(plotx) <= 24*31*3 && mod(n,24*7) == 1
+        xLabel{n} = datestr(plotx(n), 'mm-dd ddd HH:MM');
+    end
+    
+    if length(plotx) > 24*31*3 && mod(n,24*7*2) == 1
+        xLabel{n} = datestr(plotx(n), 'mm-dd ddd HH:MM');
+    end
 end
 
 %% axis control
