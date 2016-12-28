@@ -527,12 +527,12 @@ for g = 1 : groupTotal
         temp.jFrame.dispose();
         % print to file
         set(temp.hFig, 'PaperPositionMode', 'auto');
-        saveas(temp.hFig, [dirName.net '/netArchitecture.png']);
+        saveas(temp.hFig, [dirName.net sprintf('/group-%d_netArchitecture.png', g)]);
         % close figure
         close(temp.hFig)
 
         plotperform(sensor.trainRecord{s});
-        saveas(gcf,[dirName.net '/netPerform.png']);
+        saveas(gcf,[dirName.net sprintf('/group-%d_netPerform.png', g)]);
         close
         clear h jpanel
         temp = rmfield(temp, {'jFrame', 'hFig'});
