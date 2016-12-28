@@ -70,7 +70,7 @@ for day = dayStart : dayEnd
     %         imshow(img)
     %         set(gcf, 'visible', 'on');
 
-            label{s}(count) = vec2ind(neuralNet(img(:)));
+            label{s}(count) = vec2ind(neuralNet{s}(img(:))); % !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! nn
 
             pathSaveAll = [pathSaveNet{s,label{s}(count)} '/' labelName{label{s}(count)} '_' num2str(count) '.png'];
             imwrite(img, pathSaveAll);

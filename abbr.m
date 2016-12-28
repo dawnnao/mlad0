@@ -35,7 +35,7 @@ edge = [];
 grp = 1;
 if line(1) > 0, edge(1,grp) = 1; end
 
-for n = 2:length(line)
+for n = 2 : length(line)
     
     if line(n) > 0 && line(n-1) == 0
         edge(1,grp) = n;
