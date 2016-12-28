@@ -666,24 +666,13 @@ close
 
 % crop legend to panorama's folder
 img = imread([dirName.plotSum '/' dirName.statsSum]);
-imgLegend = imcrop(img, [880.5 55.5 210 284]);
+if ispc
+    imgLegend = imcrop(img, [646.5 42.5 172 264]);
+elseif ismac
+    imgLegend = imcrop(img, [660.5 42.5 160 229]);
+end
 figure, imshow(imgLegend)
 saveas(gcf, [dirName.plotPano '/legend.png']); close
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 elapsedTime(3) = toc(t(3)); [hours, mins, secs] = sec2hms(elapsedTime(3));
 fprintf('\n\n\nSTEP3:\nAnomaly detection completes, using %02dh%02dm%05.2fs .\n', ...
