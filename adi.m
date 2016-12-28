@@ -299,22 +299,6 @@ while goNext == 0
         end
         close
         
-%         % find label and corresponding data
-%         for l = 1 : labelNum
-%             count.label{l,s} = find(sensor.label.manual{s}(l,:));
-%             manual.label{l}.data{s} = sensor.data{s}(:,count.label{l,s});
-%         end
-        
-%         % generate all folders
-%         for l = 1 : labelNum
-%             count.label{l,s} = find(sensor.label.manual{s}(l,:));
-%             manual.label{l}.data{s} = sensor.data{s}(:,count.label{l,s});
-%             dirName.label.manual{l,s} = [dirName.sensor{s} '/' sensor.label.name{l} '/manual'];
-%             if ~exist(dirName.label.manual{l,s},'dir'), mkdir(dirName.label.manual{l,s}); end
-%             dirName.label.net{l,s} = [dirName.sensor{s} '/' sensor.label.name{l} '/neuralNet'];
-%             if ~exist(dirName.label.net{l,s},'dir'), mkdir(dirName.label.net{l,s}); end
-%         end
-        
 %         ticRemain = tic;
         c = 0; % total count initialize
         for l = 1 : labelTotal
@@ -361,14 +345,6 @@ while goNext == 0
             if isempty(check), rmdir([dirName.sensor{s} '/' sensor.label.name{l}], 's'); end
             
         end
-        
-%         % delete useless folder(s)
-%         dot = '.. .';
-%         for l = 1:labelNum
-%             check = ls(dirName.label.manual{l,s});
-%         if ispc, check(1:4) = []; end
-%             if isempty(check), rmdir([dirName.sensor{s} '/' sensor.label.name{l}], 's'); end
-%         end
         
         % pass to 'temp' suffix variables
         labelTemp = sensor.label.manual{s};
@@ -458,22 +434,22 @@ if ~isempty(step) && step(1) == 3
     dirName.mat = [GetFullPath(dirName.home) '/trainingSetMat'];
     
     for g = 1 : groupTotal
-    for s = sensor.num{g}
-        dirName.matPart{s} = [dirName.mat sprintf('/sensor%02d.mat', s)];
-        if ~exist(dirName.matPart{s}, 'file')
-            fprintf('\nCAUTION:\nSensor-%02d traning set not found! Ignored it.\n', s)
-            index = find(sensor.num{g} == s);
-            sensor.num{g}(index) = [];
-        else
-            load(dirName.matPart{s});
-            sensor.label.manual{s} = labelTemp;
-            for l = 1 : labelTotal
-                manual.label{l}.image{s} = manualTemp{l};
-                count.label{l,s} = countTemp{l};
+        for s = sensor.num{g}
+            dirName.matPart{s} = [dirName.mat sprintf('/sensor%02d.mat', s)];
+            if ~exist(dirName.matPart{s}, 'file')
+                fprintf('\nCAUTION:\nSensor-%02d traning set not found! Ignored it.\n', s)
+                index = find(sensor.num{g} == s);
+                sensor.num{g}(index) = [];
+            else
+                load(dirName.matPart{s});
+                sensor.label.manual{s} = labelTemp;
+                for l = 1 : labelTotal
+                    manual.label{l}.image{s} = manualTemp{l};
+                    count.label{l,s} = countTemp{l};
+                end
+                clear labelTemp manualTemp countTemp
             end
-            clear labelTemp manualTemp countTemp
         end
-    end
     end
     % update
     sensor.numVec = [];
@@ -499,8 +475,6 @@ hourTotal = (date.serial.end-date.serial.start+1)*24;
 
 dirName.net = [dirName.home '/net'];
 if ~exist(dirName.net,'dir'), mkdir(dirName.net); end
-
-% !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 fprintf('\nData combining...\n')
 for g = 1 : groupTotal
@@ -588,7 +562,6 @@ for g = 1 : groupTotal
     clear labelTempNeural countTempNeural
     fprintf('\nGroup %d done.\n\n\n', g)
 end
-% !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 % plot panorama
 dirName.plotPano = [dirName.home '/plot/panorama'];
