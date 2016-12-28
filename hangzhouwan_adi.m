@@ -8,6 +8,7 @@ dateStart = '2016-01-01';
 dateEnd = '2016-01-1';
 sensorTrainRatio = 40/100;
 % sensorPSize = 10;
+labelName = {'1-normal','2-outlier','3-minor'};
 
 % %% []
 % sensor = adi(pathRoot,sensorNum,dateStart,dateEnd,sensorTrainRatio,[]);
@@ -18,8 +19,8 @@ sensorTrainRatio = 40/100;
 % 
 %% s2
 % sensorTrainRatio = 20/100;
-step = [3];
-sensor = adi(pathRoot,sensorNum,dateStart,dateEnd,sensorTrainRatio,[],step);
+step = [2 3];
+sensor = adi(pathRoot,sensorNum,dateStart,dateEnd,sensorTrainRatio,[],step,labelName);
 
 % %% s3
 % step = [3];

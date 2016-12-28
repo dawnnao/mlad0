@@ -1,4 +1,4 @@
-function sensor = adi(pathRoot, sensorNum, dateStart, dateEnd, sensorTrainRatio, sensorPSize, step)
+function sensor = adi(pathRoot, sensorNum, dateStart, dateEnd, sensorTrainRatio, sensorPSize, step, labelName)
 % DESCRIPTION:
 %   This is a smart pre-processing(spp) function for bridge's structural
 %   health monitoring data. The work flow is: read tidy data -> assist user
@@ -85,6 +85,9 @@ function sensor = adi(pathRoot, sensorNum, dateStart, dateEnd, sensorTrainRatio,
 if ~exist('sensorTrainRatio', 'var') || isempty(sensorTrainRatio), sensorTrainRatio = 5/100; end
 if ~exist('sensorPSize', 'var') || isempty(sensorPSize), sensorPSize = 10; end
 if ~exist('step', 'var'), step = []; end
+if ~exist('labelName', 'var') || isempty(labelName)
+    labelName = {'1-normal','2-outlier','3-minor','4-missing','5-trend','6-drift','7-bias','8-cutoff','9-square'};
+end
 
 %% pass variables
 sensor.num = sensorNum;
@@ -94,9 +97,10 @@ for n = 1 : length(sensor.num)
     sensor.trainRatio(sensor.num(n)) = sensorTrainRatio;
 end
 sensor.pSize = sensorPSize;
+sensor.label.name = labelName;
 
 %% common variables
-sensor.label.name = {'1-normal','2-outlier','3-minor','4-missing','5-trend','6-drift','7-bias','8-cutoff','9-square'};
+labelNum = length(sensor.label.name);
 color= {[129 199 132]/255;    % 1-normal     green
         [244 67 54]/255;      % 2-outlier    red
         [121 85 72]/255;      % 3-minor      brown
@@ -105,8 +109,12 @@ color= {[129 199 132]/255;    % 1-normal     green
         [171 71 188]/255;     % 6-drift      purple
         [255 235 59]/255;     % 7-bias       yellow
         [168 168 168]/255;    % 8-cutoff     gray
-        [50 50 50]/255};      % 9-square     black    
-labelNum = length(sensor.label.name);
+        [50 50 50]/255;       % 9-square     black
+        [0 121 107]/255;      % for custom   dark green
+        [24 255 255]/255;     % for custom   high-light blue
+        [118 255 3]/255;      % for custom   high-light green
+        [255 255 0]/255;      % for custom   high-light yellow
+        [50 50 50]/255};      % for custom   dark green
 
 %% 0 generate file and folder names
 sensorStr = tidyName(abbr(sensor.num));
@@ -258,8 +266,10 @@ while goNext == 0
             set(gca,'Units','normalized', 'Position',[0.1300 0.1100 0.7750 0.8150]);  % control axis's position in figure
             xlim([0 size(sensor.data{s},1)]);
             fprintf('\nSensor-%02d trainning set size: %d  Now: %d\n', s, sensor.trainSetSize(s), n)
-            fprintf('Data type:\n1-normal    2-outlier    3-minor     4-missing    5-trend')
-            fprintf('\n6-drift     7-bias       8-cutoff    9-square     0-redo previous')
+            fprintf('Data type:')
+            for l = 1 : labelNum
+                fprintf('\n%s', sensor.label.name{l})
+            end
             prompt = '\nInput: ';
             classify = input(prompt,'s');
             classify = str2double(classify);  % filter charactor input
@@ -564,7 +574,7 @@ end
 dirName.plotPano = [dirName.home '/plot/panorama'];
 if ~exist(dirName.plotPano, 'dir'), mkdir(dirName.plotPano); end
 for s = sensor.num
-    panorama(sensor.date.serial{s}, sensor.label.neuralNet{s}, sprintf('Sensor%02d', s), color);
+    panorama(sensor.date.serial{s}, sensor.label.neuralNet{s}, sprintf('Sensor%02d', s), color(1:labelNum));
     dirName.panorama{s} = [sprintf('%s--%s_sensor_%02d', date.start, date.end, s) '_anomalyDetectionPanorama.png'];
     saveas(gcf,[dirName.plotPano '/' dirName.panorama{s}]);
     fprintf('\nSenor-%02d anomaly detection panorama file location:\n%s\n', ...
