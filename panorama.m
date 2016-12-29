@@ -121,16 +121,17 @@ ax.XColor = color.axis;
 ax.YColor = color.axis;
 ax.YTick = [];
 ax.YLabel.String = yStr;
-ax.YLabel.FontSize = 16;
+ax.YLabel.FontSize = 9;
 
 %% size control
 fig = gcf;
 fig.Units = 'normalized';
-fig.Position = [0 0.75 1 0.15];  % control figure's position
+% fig.Position = [0 0.75 1 0.15];  % control figure's position
+fig.Position = [0 0.75 1 0.08];  % control figure's position
 % set(gcf,'color','w');
 fig.Color = 'w';
 ax.Units = 'normalized';
-ax.Position = [0.055 0.25 0.94 0.72];  % control ax's position in figure
+ax.Position = [0.055 0.45 0.94 0.5];  % control ax's position in figure
 
 end
 

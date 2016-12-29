@@ -280,41 +280,41 @@ savePath = [GetFullPath(dirName.home) '/' dirName.file];
 load(savePath)
 sensor.label.name = labelNameTemp;
 
-% % plot panorama
-% dirName.plotPano = [dirName.home '/plot/panorama'];
-% if ~exist(dirName.plotPano, 'dir'), mkdir(dirName.plotPano); end
-% for s = sensor.numVec
-%     panorama(sensor.date.serial{s}, sensor.label.neuralNet{s}, sprintf('Sensor%02d', s), color(1:labelTotal));
-%     dirName.panorama{s} = [sprintf('%s--%s_sensor_%02d', date.start, date.end, s) '_anomalyDetectionPanorama.png'];
-%     saveas(gcf,[dirName.plotPano '/' dirName.panorama{s}]);
-%     fprintf('\nSenor-%02d anomaly detection panorama file location:\n%s\n', ...
-%         s, GetFullPath([dirName.plotPano '/' dirName.panorama{s}]))
-% %     fprintf('\nPress anykey to continue.\n')
-%     pause(1.5)
-%     close
-%     % update sensor.status
-%     sensor.status{s}(2,3) = {1};
-% end
-
-% plot monthly stats per sensor
-dirName.plotSPS = [dirName.home '/plot/statsPerSensor'];
-if ~exist(dirName.plotSPS, 'dir'), mkdir(dirName.plotSPS); end
+% plot panorama
+dirName.plotPano = [dirName.home '/plot/panorama'];
+if ~exist(dirName.plotPano, 'dir'), mkdir(dirName.plotPano); end
 for s = sensor.numVec
-    for n = 1 : 12
-        for l = 1 : labelTotal
-            aim = find(sensor.date.vec{s}(:,2) == n);
-            sensor.statsPerSensor{s}(n, l) = length(find(sensor.label.neuralNet{s}(aim) == l));
-        end
-    end
-    monthStatsPerSensor(sensor.statsPerSensor{s}, s, sensor.label.name, color);
-    dirName.statsPerSensor{s} = [sprintf('%s--%s_sensor_%02d', date.start, date.end, s) '_anomalyStats.png'];
-    saveas(gcf,[dirName.plotSPS '/' dirName.statsPerSensor{s}]);
-    fprintf('\nSenor-%02d anomaly stats bar-plot file location:\n%s\n', ...
-        s, GetFullPath([dirName.plotSPS '/' dirName.statsPerSensor{s}]))
+    panorama(sensor.date.serial{s}, sensor.label.neuralNet{s}, sprintf('Sensor%02d', s), color(1:labelTotal));
+    dirName.panorama{s} = [sprintf('%s--%s_sensor_%02d', date.start, date.end, s) '_anomalyDetectionPanorama.png'];
+    saveas(gcf,[dirName.plotPano '/' dirName.panorama{s}]);
+    fprintf('\nSenor-%02d anomaly detection panorama file location:\n%s\n', ...
+        s, GetFullPath([dirName.plotPano '/' dirName.panorama{s}]))
 %     fprintf('\nPress anykey to continue.\n')
     pause(1.5)
     close
+    % update sensor.status
+    sensor.status{s}(2,3) = {1};
 end
+
+% % plot monthly stats per sensor
+% dirName.plotSPS = [dirName.home '/plot/statsPerSensor'];
+% if ~exist(dirName.plotSPS, 'dir'), mkdir(dirName.plotSPS); end
+% for s = sensor.numVec
+%     for n = 1 : 12
+%         for l = 1 : labelTotal
+%             aim = find(sensor.date.vec{s}(:,2) == n);
+%             sensor.statsPerSensor{s}(n, l) = length(find(sensor.label.neuralNet{s}(aim) == l));
+%         end
+%     end
+%     monthStatsPerSensor(sensor.statsPerSensor{s}, s, sensor.label.name, color);
+%     dirName.statsPerSensor{s} = [sprintf('%s--%s_sensor_%02d', date.start, date.end, s) '_anomalyStats.png'];
+%     saveas(gcf,[dirName.plotSPS '/' dirName.statsPerSensor{s}]);
+%     fprintf('\nSenor-%02d anomaly stats bar-plot file location:\n%s\n', ...
+%         s, GetFullPath([dirName.plotSPS '/' dirName.statsPerSensor{s}]))
+% %     fprintf('\nPress anykey to continue.\n')
+%     pause(1.5)
+%     close
+% end
 
 % % plot anomaly space-time distribution per type
 % dirName.plotSPT = [dirName.home '/plot/statsPerType'];
