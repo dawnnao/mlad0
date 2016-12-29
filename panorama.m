@@ -115,6 +115,7 @@ end
 stem(plotx, bigTick, 'linewidth', 1, 'marker', 'none', 'color', color.axis);
 hold off
 box off
+% ax.XTick = [];
 ax.XTickLabel = xLabel;
 ax.XTickLabelRotation = 12;  % rotation
 ax.XColor = color.axis;

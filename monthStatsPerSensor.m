@@ -15,7 +15,7 @@ for n = 1 : length(labelName)
 end
 set(h, 'EdgeColor', [107 107 107]/255);
 
-set(gcf,'Units','pixels','Position',[100, 100, 1000, 618]);  % control figure's position
+set(gcf,'Units','pixels','Position',[100, 100, 1000, 800]);  % control figure's position
 % set(gca,'Units','normalized', 'Position',[0 0 1 1]);  % control axis's position in figure
 
 end

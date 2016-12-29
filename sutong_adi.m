@@ -12,5 +12,5 @@ sensorPSize = 10;
 step = [3];
 
 %%
-sensor = adi(pathRoot,sensorNum,dateStart,dateEnd,sensorTrainRatio,sensorPSize,step);
+sensor = adi3p5(pathRoot,sensorNum,dateStart,dateEnd,sensorTrainRatio,sensorPSize,step);
 
