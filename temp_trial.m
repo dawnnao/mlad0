@@ -1,5 +1,20 @@
-img = imread('z.png');
+%% Create 3-D Bar Graph
+% Load the data set |count.dat|, which returns a three-column matrix, |count|.
+% Store |Y| as the first 10 rows of |count|.
 
-imcrop(img)
+% Copyright 2015 The MathWorks, Inc.
 
-[882.5 57.5 204 280]
+load count.dat
+Y = count(1:10,:);
+
+%%
+% Create a 3-D bar graph of |Y|. By default, the style is |detached|.
+% figure
+bar3(Y')
+xlabel('Type')
+ylabel('Month')
+zlabel('Count (hours)')
+title('Detached Style')
+view(45, 30)
+
+
