@@ -132,7 +132,7 @@ fig.Position = [0 0.75 1 0.08];  % control figure's position
 % set(gcf,'color','w');
 fig.Color = 'w';
 ax.Units = 'normalized';
-ax.Position = [0.055 0.44 0.94 0.54];  % control ax's position in figure
+ax.Position = [0.055 0.45 0.94 0.52];  % control ax's position in figure
 
 end
 
