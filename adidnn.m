@@ -496,28 +496,8 @@ for g = 1 : groupTotal
     feature{g}.image = feature{g}.image(:, randp{g});
     feature{g}.label.manual = feature{g}.label.manual(:, randp{g});
     for s = sensor.num{g}(1)
-%         % !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-%         % train neural net work
-%         % choose a training function
-%         % for a list of all training functions type: help nntrain
-%         % 'trainlm' is usually fastest
-%         % 'trainbr' takes longer but may be better for challenging problems
-%         % 'trainscg' uses less memory, suitable in low memory situations, default
-%         trainFcn = 'trainscg';  % scaled conjugate gradient backpropagation.
-%         % create a pattern recognition network
-%         hiddenLayerSize = 20;                % set hidden layer size (node quantity)
-%         sensor.neuralNet{s} = patternnet(hiddenLayerSize, trainFcn);
-%         % setup division of data for training, validation, testing
-%         sensor.neuralNet{s}.divideParam.trainRatio = 70/100;
-%         sensor.neuralNet{s}.divideParam.valRatio = 15/100;
-%         sensor.neuralNet{s}.divideParam.testRatio = 15/100;
-%         % train network
-%         [sensor.neuralNet{s},sensor.trainRecord{s}] = ...
-%             train(sensor.neuralNet{s}, feature{g}.image, feature{g}.label.manual); % problem here !!!
-%         nntraintool close
-        
         % train deep neural network
-        feature{g}.trainRatio = 70/100;
+        feature{g}.trainRatio = 50/100;
         feature{g}.trainSize = floor(size(feature{g}.image,2) * feature{g}.trainRatio);
         % hidden layer 1
         hiddenSize(1) = 200;
@@ -557,10 +537,12 @@ for g = 1 : groupTotal
 %         plotWeights(autoenc{2});
 %         plotWeights(autoenc{3});
 %         set(findobj(0,'type','figure'),'visible','on');
-%         set(gcf,'color','white');     %ÉèÖÃ±³¾°Îª°×É«
-        y = sensor.neuralNet{s}(feature{g}.image(:,feature{g}.trainSize+1 : end));
-        plotconfusion(feature{g}.label.manual(:,feature{g}.trainSize+1 : end), y);
+%         set(gcf,'color','white');
+
         % fine tuning
+%         sensor.neuralNet{s}.divideParam.trainRatio = 70/100;
+%         sensor.neuralNet{s}.divideParam.valRatio = 15/100;
+%         sensor.neuralNet{s}.divideParam.testRatio = 15/100;
         [sensor.neuralNet{s},sensor.trainRecord{s}] = train(sensor.neuralNet{s}, ...
             feature{g}.image(:,1 : feature{g}.trainSize), feature{g}.label.manual(:,1 : feature{g}.trainSize));
         
@@ -599,24 +581,24 @@ for g = 1 : groupTotal
             sensor.trainRecord{s} = sensor.trainRecord{sensor.num{g}(1)};
         end
     end
-
-    % classification
-    fprintf('\nDetecting...\n')
-    [labelTempNeural, countTempNeural, dateVec, dateSerial] = ...
-        classifierMulti(pathRoot, sensor.num{g}, date.serial.start, date.serial.end, ...
-        dirName.home, sensor.label.name, sensor.neuralNet); % give all nn, need to check
-    % to avoid overwritten by next group
-    for s = sensor.num{g}
-        sensor.label.neuralNet{s} = labelTempNeural{s};
-        for l = 1 : labelTotal
-            sensor.count{l,s} = countTempNeural{l,s};
-        end
-        sensor.date.vec{s} = dateVec;
-        sensor.date.serial{s} = dateSerial;
-    end
-    clear labelTempNeural countTempNeural
-    fprintf('\nGroup %d done.\n\n\n', g)
+    
+    fprintf('\nGroup-%d dnn training done.\n\n\n', g)
 end
+
+% classification
+fprintf('\nDetecting...\n')
+[labelTempNeural, countTempNeural, dateVec, dateSerial] = ...
+    classifierMulti(pathRoot, sensor.numVec, date.serial.start, date.serial.end, ...
+    dirName.home, sensor.label.name, sensor.neuralNet);
+for s = sensor.numVec
+    sensor.label.neuralNet{s} = labelTempNeural{s};
+    for l = 1 : labelTotal
+        sensor.count{l,s} = countTempNeural{l,s};
+    end
+    sensor.date.vec{s} = dateVec;
+    sensor.date.serial{s} = dateSerial;
+end
+clear labelTempNeural countTempNeural
 
 % plot panorama
 dirName.plotPano = [dirName.home '/plot/panorama'];

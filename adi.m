@@ -549,7 +549,7 @@ for g = 1 : groupTotal
     fprintf('\nDetecting...\n')
     [labelTempNeural, countTempNeural, dateVec, dateSerial] = ...
         classifierMulti(pathRoot, sensor.num{g}, date.serial.start, date.serial.end, ...
-        dirName.home, sensor.label.name, sensor.neuralNet); % give all nn, need to check
+        dirName.home, sensor.label.name, sensor.neuralNet);
     % to avoid overwritten by next group
     for s = sensor.num{g}
         sensor.label.neuralNet{s} = labelTempNeural{s};
