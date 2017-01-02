@@ -122,7 +122,7 @@ ax.XColor = color.axis;
 ax.YColor = color.axis;
 ax.YTick = [];
 ax.YLabel.String = yStr;
-ax.YLabel.FontSize = 9;
+ax.YLabel.FontSize = 8;
 
 %% size control
 fig = gcf;
