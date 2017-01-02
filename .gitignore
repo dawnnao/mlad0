@@ -8,6 +8,8 @@ sutong-*.txt
 20*
 ~*
 *.asv
+net
+temp
 
 # Compiled source #
 ###################
