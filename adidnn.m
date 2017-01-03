@@ -582,8 +582,14 @@ for g = 1 : groupTotal
         end
     end
     
-    fprintf('\nGroup-%d dnn training done.\n\n\n', g)
+    fprintf('\nGroup-%d dnn training done.\n', g)
 end
+
+% save dnn(s)
+savePath = [GetFullPath(dirName.home) '/' dirName.file];
+fprintf('\nSaving trained dnn(s)...\nLocation: %s\n', savePath)
+if exist(savePath, 'file'), delete(savePath); end
+save(savePath, '-v7.3')
 
 % classification
 fprintf('\nDetecting...\n')
