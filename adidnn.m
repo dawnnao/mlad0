@@ -398,8 +398,8 @@ fprintf('\n\n\nSTEP2:\nSensor(s) training set making completes, using %02d:%02d:
     hours, mins, secs)
 
 % ask go on or stop
-head = 'Continue to step3, automatically train neural network and do classification now?';
-tail = 'Continue to automatically train neural network and do classification...';
+head = 'Continue to step3, automatically train deep neural network(s) now?';
+tail = 'Continue to automatically train deep neural network(s)...';
 
 if isempty(step)
     rightInput = 0;
@@ -422,7 +422,7 @@ clear head tail savePath
 
 end
 
-%% 3 train network and do classification
+%% 3 train network(s)
 if ismember(3, step) || isempty(step)
 % update new parameters and load training sets
 if ~isempty(step) && step(1) == 3
@@ -492,6 +492,7 @@ seed = 1;
 rng(seed,'twister');
 fprintf('\nTraining...\n')
 for g = 1 : groupTotal
+    ticRemain = tic;
     randp{g} = randperm(size(feature{g}.image,2));  % randomization
     feature{g}.image = feature{g}.image(:, randp{g});
     feature{g}.label.manual = feature{g}.label.manual(:, randp{g});
@@ -545,7 +546,7 @@ for g = 1 : groupTotal
 %         sensor.neuralNet{s}.divideParam.testRatio = 15/100;
         [sensor.neuralNet{s},sensor.trainRecord{s}] = train(sensor.neuralNet{s}, ...
             feature{g}.image(:,1 : feature{g}.trainSize), feature{g}.label.manual(:,1 : feature{g}.trainSize));
-        
+        nntraintool close
         y = sensor.neuralNet{s}(feature{g}.image(:,feature{g}.trainSize+1 : end));
         
         temp.jFrame = view(sensor.neuralNet{s});
@@ -582,16 +583,67 @@ for g = 1 : groupTotal
         end
     end
     
-    fprintf('\nGroup-%d dnn training done.\n', g)
+    fprintf('\nGroup-%d dnn training done. ', g)
+    tocRemain = toc(ticRemain);
+    tRemain = tocRemain * (groupTotal - g);
+    [hours, mins, secs] = sec2hms(tRemain);
+    fprintf('About %02dh%02dm%05.2fs left.\n', hours, mins, secs)
+    
 end
 
-% save dnn(s)
+elapsedTime(3) = toc(t(3)); [hours, mins, secs] = sec2hms(elapsedTime(3));
+fprintf('\n\n\nSTEP3:\nDeep neural network(s) training completes, using %02dh%02dm%05.2fs .\n', ...
+    hours, mins, secs)
+
+% ask go on or stop
+head = 'Continue to step4 - anomaly detection?';
+tail = 'Continue to anomaly detection...';
 savePath = [GetFullPath(dirName.home) '/' dirName.file];
-fprintf('\nSaving trained dnn(s)...\nLocation: %s\n', savePath)
+fprintf('\nSaving results...\nLocation: %s\n', savePath)
 if exist(savePath, 'file'), delete(savePath); end
 save(savePath, '-v7.3')
+if isempty(step)
+    rightInput = 0;
+    while rightInput == 0
+        fprintf('\n%s\n', head)
+        prompt = 'y(yes)/n(no): ';
+        go = input(prompt,'s');
+        if strcmp(go,'y') || strcmp(go,'yes')
+            rightInput = 1; fprintf('\n%s\n\n\n', tail)
+        elseif strcmp(go,'n') || strcmp(go,'no')
+            rightInput = 1; fprintf('\nFinish.\n'), return
+        else fprintf('Invalid input! Please re-input.\n')
+        end
+    end
+elseif step == 3, fprintf('\nFinish.\n'), return
+elseif ismember(4, step), fprintf('\n%s\n\n\n', tail)
+end
+pause(0.5)
+clear head tail savePath
 
-% classification
+end
+
+%% 4 anomaly detection
+if ismember(4, step) || isempty(step)
+% update new parameters and load training sets
+if ~isempty(step) && step(1) == 4
+    newP{2,1} = sensor.pSize;
+    newP{3,1} = step;
+    
+    readPath = [GetFullPath(dirName.home) '/' dirName.file];
+    load(readPath)
+    
+    sensor.pSize =  newP{2,1};
+    step = newP{3,1};
+    clear newP
+end
+t(4) = tic;
+dirName.formatIn = 'yyyy-mm-dd';
+date.serial.start = datenum(date.start, dirName.formatIn);  % day numbers from year 0000
+date.serial.end   = datenum(date.end, dirName.formatIn);
+hourTotal = (date.serial.end-date.serial.start+1)*24;
+
+% anomaly detection
 fprintf('\nDetecting...\n')
 [labelTempNeural, countTempNeural, dateVec, dateSerial] = ...
     classifierMulti(pathRoot, sensor.numVec, date.serial.start, date.serial.end, ...
@@ -616,10 +668,10 @@ for s = sensor.numVec
     fprintf('\nSenor-%02d anomaly detection panorama file location:\n%s\n', ...
         s, GetFullPath([dirName.plotPano '/' dirName.panorama{s}]))
 %     fprintf('\nPress anykey to continue.\n')
-    pause(1.5)
+%     pause(1.5)
     close
     % update sensor.status
-    sensor.status{s}(2,3) = {1};
+    sensor.status{s}(2,4) = {1};
 end
 
 % plot monthly stats per sensor
@@ -638,7 +690,7 @@ for s = sensor.numVec
     fprintf('\nSenor-%02d anomaly stats bar-plot file location:\n%s\n', ...
         s, GetFullPath([dirName.plotSPS '/' dirName.statsPerSensor{s}]))
 %     fprintf('\nPress anykey to continue.\n')
-    pause(1.5)
+%     pause(1.5)
     close
 end
 
@@ -654,13 +706,13 @@ for l = 1 : labelTotal
    end
    if sum(sum(sensor.statsPerLabel{l})) > 0
         monthStatsPerLabel(sensor.statsPerLabel{l}, l, sensor.label.name{l}, color);
-        dirName.statsPerLabel{l} = [sprintf('%s--%s_sensor%s_anomalyStats_%s.png', ...
-            date.start, date.end, sensorStr, sensor.label.name{l})];
+        dirName.statsPerLabel{l} = sprintf('%s--%s_sensor%s_anomalyStats_%s.png', ...
+            date.start, date.end, sensorStr, sensor.label.name{l});
         saveas(gcf,[dirName.plotSPT '/' dirName.statsPerLabel{l}]);
         fprintf('\n%s anomaly stats bar-plot file location:\n%s\n', ...
             sensor.label.name{l}, GetFullPath([dirName.plotSPT '/' dirName.statsPerLabel{l}]))
 %         fprintf('\nPress anykey to continue.\n')
-        pause(1.5)
+%         pause(1.5)
         close
     end
 end
@@ -697,7 +749,7 @@ dirName.statsSum = sprintf('%s--%s_sensor%s_anomalyStats.png', ...
 saveas(gcf,[dirName.plotSum '/' dirName.statsSum]);
 fprintf('\nSum-up anomaly stats image file location:\n%s\n', ...
     GetFullPath([dirName.plotSum '/' dirName.statsSum]))
-pause(1.5)
+% pause(1.5)
 close
 
 % crop legend to panorama's folder
@@ -711,12 +763,12 @@ end
 figure, imshow(imgLegend)
 saveas(gcf, [dirName.plotPano '/legend.png']); close
 
-elapsedTime(3) = toc(t(3)); [hours, mins, secs] = sec2hms(elapsedTime(3));
-fprintf('\n\n\nSTEP3:\nAnomaly detection completes, using %02dh%02dm%05.2fs .\n', ...
+elapsedTime(4) = toc(t(4)); [hours, mins, secs] = sec2hms(elapsedTime(4));
+fprintf('\n\n\nSTEP4:\nAnomaly detection completes, using %02dh%02dm%05.2fs .\n', ...
     hours, mins, secs)
 
 % ask go on or stop
-head = 'Continue to step4, automatically remove outliers?';
+head = 'Continue to step5, automatically remove outliers?';
 tail = 'Continue to automatically remove outliers...';
 savePath = [GetFullPath(dirName.home) '/' dirName.file];
 fprintf('\nSaving results...\nLocation: %s\n', savePath)
@@ -735,18 +787,18 @@ if isempty(step)
         else fprintf('Invalid input! Please re-input.\n')
         end
     end
-elseif step == 3, fprintf('\nFinish.\n'), return
-elseif ismember(4, step), fprintf('\n%s\n\n\n', tail)
+elseif step == 4, fprintf('\nFinish.\n'), return
+elseif ismember(5, step), fprintf('\n%s\n\n\n', tail)
 end
 pause(0.5)
 clear head tail savePath
 
 end
 
-%% 4 clean outliers
-if ismember(4, step) || isempty(step)
+%% 5 clean outliers
+if ismember(5, step) || isempty(step)
 % update new parameters
-if step == 4
+if step == 5
     for s = sensor.num
         newP{1,s} = sensor.trainRatio(s);
     end
@@ -760,7 +812,7 @@ if step == 4
     step = newP{3,1};
     clear newP
 end
-t(4) = tic;
+t(5) = tic;
 dirName.outlierCleaned = [dirName.home '/outlierCleaned'];
 if ~exist(dirName.outlierCleaned,'dir'), mkdir(dirName.outlierCleaned); end
 
@@ -826,9 +878,9 @@ while n <= util.hours
     end
 
     if n == util.hours+1
-        elapsedTime(4) = toc(t(4));
-        [hours, mins, secs] = sec2hms(elapsedTime(4));
-        fprintf('\n\n\n\n\n\nSTEP4:\nSensor-%02d outlier cleaning done, using %02d:%02d:%05.2f .\n', ...
+        elapsedTime(5) = toc(t(5));
+        [hours, mins, secs] = sec2hms(elapsedTime(5));
+        fprintf('\n\n\n\n\n\nSTEP5:\nSensor-%02d outlier cleaning done, using %02d:%02d:%05.2f .\n', ...
             s, hours, mins, secs)
         fprintf('%d data pieces cleaned.\n', length(sensor.count{3,s}))
     end
@@ -836,7 +888,7 @@ end
 close
 
 % update sensor.status
-sensor.status{s}(2,4) = {1};
+sensor.status{s}(2,5) = {1};
 fprintf('\nSaving results...\nLocation: %s\n', GetFullPath(dirName.home))
 t(5) = tic;
 if exist([dirName.home '/' dirName.file], 'file'), delete([dirName.home '/' dirName.file]); end
