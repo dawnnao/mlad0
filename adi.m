@@ -513,7 +513,10 @@ for g = 1 : groupTotal
         % train network
         [sensor.neuralNet{s},sensor.trainRecord{s}] = ...
             train(sensor.neuralNet{s}, feature{g}.image, feature{g}.label.manual); % problem here !!!
+        pause(3)
         nntraintool close
+        saveas(gcf,[dirName.net sprintf('/group-%d_netConfuse.png', g)]);
+        close
 
         % neural net, and view it
         temp.jFrame = view(sensor.neuralNet{s});
@@ -544,8 +547,10 @@ for g = 1 : groupTotal
             sensor.trainRecord{s} = sensor.trainRecord{sensor.num{g}(1)};
         end
     end
+end
 
-    % classification
+% detection
+for g = 1 : groupTotal
     fprintf('\nDetecting...\n')
     [labelTempNeural, countTempNeural, dateVec, dateSerial] = ...
         classifierMulti(pathRoot, sensor.num{g}, date.serial.start, date.serial.end, ...

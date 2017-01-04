@@ -132,7 +132,7 @@ elseif groupTotal > 1 && groupTotal < sensorTotal
 end
 
 dirName.home = sprintf('%s/%s--%s_sensor%s%s', saveRoot, date.start, date.end, sensorStr, netlayout);
-dirName.file = [dirName.home '.mat'];
+dirName.file = sprintf('%s--%s_sensor%s%s.mat', date.start, date.end, sensorStr, netlayout);
 
 if ~exist(dirName.home,'dir'), mkdir(dirName.home); end
 for g = 1 : groupTotal
@@ -711,6 +711,7 @@ if ~isempty(step) && step(1) == 5
     newP{3,1} = step;
     
     readPath = [GetFullPath(dirName.home) '/' dirName.file];
+    fprintf('Loading...\n')
     load(readPath)
     
     sensor.pSize =  newP{2,1};
@@ -727,19 +728,16 @@ hourTotal = (date.serial.end-date.serial.start+1)*24;
 dirName.plotPano = [dirName.home '/plot/panorama'];
 if ~exist(dirName.plotPano, 'dir'), mkdir(dirName.plotPano); end
 for s = sensor.numVec
-    panorama(sensor.date.serial{s}, sensor.label.neuralNet{s}, sprintf('    S%02d', s), color(1:labelTotal));
+    panorama(sensor.date.serial{s}, sensor.label.neuralNet{s}, sprintf('      S%02d', s), color(1:labelTotal));
     dirName.panorama{s} = [sprintf('%s--%s_sensor_%02d', date.start, date.end, s) '_anomalyDetectionPanorama.png'];
     saveas(gcf,[dirName.plotPano '/' dirName.panorama{s}]);
     fprintf('\nSenor-%02d anomaly detection panorama file location:\n%s\n', ...
         s, GetFullPath([dirName.plotPano '/' dirName.panorama{s}]))
-%     fprintf('\nPress anykey to continue.\n')
-%     pause(1.5)
     close
     % update sensor.status
     sensor.status{s}(2,5) = {1};
 end
 
-% !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 n = 0;
 panopano = [];
 for s = sensor.numVec
@@ -753,11 +751,11 @@ for s = sensor.numVec
     panopano = cat(1, p{s}, panopano);
 end
 imshow(panopano)
-dirName.panopano = [sprintf('%s--%s_sensor%s', date.start, date.end, sensorStr) ...
+dirName.panopano = [sprintf('%s--%s_sensor_all%s', date.start, date.end, sensorStr) ...
                     '_anomalyDetectionPanorama.png'];
 saveas(gcf, [dirName.plotPano '/' dirName.panopano]);
+close
 clear height width p n
-% !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 % plot monthly stats per sensor
 dirName.plotSPS = [dirName.home '/plot/statsPerSensor'];
@@ -774,8 +772,7 @@ for s = sensor.numVec
     saveas(gcf,[dirName.plotSPS '/' dirName.statsPerSensor{s}]);
     fprintf('\nSenor-%02d anomaly stats bar-plot file location:\n%s\n', ...
         s, GetFullPath([dirName.plotSPS '/' dirName.statsPerSensor{s}]))
-%     fprintf('\nPress anykey to continue.\n')
-%     pause(1.5)
+
     close
 end
 
@@ -796,8 +793,6 @@ for l = 1 : labelTotal
         saveas(gcf,[dirName.plotSPT '/' dirName.statsPerLabel{l}]);
         fprintf('\n%s anomaly stats bar-plot file location:\n%s\n', ...
             sensor.label.name{l}, GetFullPath([dirName.plotSPT '/' dirName.statsPerLabel{l}]))
-%         fprintf('\nPress anykey to continue.\n')
-%         pause(1.5)
         close
     end
 end
@@ -834,13 +829,12 @@ dirName.statsSum = sprintf('%s--%s_sensor%s_anomalyStats.png', ...
 saveas(gcf,[dirName.plotSum '/' dirName.statsSum]);
 fprintf('\nSum-up anomaly stats image file location:\n%s\n', ...
     GetFullPath([dirName.plotSum '/' dirName.statsSum]))
-% pause(1.5)
 close
 
 % crop legend to panorama's folder
 img = imread([dirName.plotSum '/' dirName.statsSum]);
 if ispc
-    imgLegend = imcrop(img, [646.5 42.5 172 264]);
+    imgLegend = imcrop(img, [646.5 42.5 172 300]);
 elseif ismac
 %     imgLegend = imcrop(img, [660.5 42.5 160 229]);
     imgLegend = imcrop(img, [882.5 57.5 204 280]);
@@ -921,8 +915,6 @@ while n <= util.hours
             [hours, mins, secs] = sec2hms(tRemain);
             fprintf('%02dh%02dm%05.2fs estimated time left.\n', hours, mins, secs)
             pause(2.5)
-%             fprintf('Press anykey to continue.\n')
-%             pause
             out.dotCount = 0;
             n = n + 1;
 %         elseif temp.classify == 2
