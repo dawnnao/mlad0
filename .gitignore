@@ -11,6 +11,8 @@ sutong-*.txt
 net
 temp
 *.mp4
+net-parallel-dnn
+net-parallel-ann
 
 # Compiled source #
 ###################
