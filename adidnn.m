@@ -750,11 +750,9 @@ for s = sensor.numVec
     end
     panopano = cat(1, p{s}, panopano);
 end
-imshow(panopano)
 dirName.panopano = [sprintf('%s--%s_sensor_all%s', date.start, date.end, sensorStr) ...
                     '_anomalyDetectionPanorama.png'];
 imwrite(panopano, [dirName.plotPano '/' dirName.panopano]);
-close
 clear height width p n
 
 % % plot monthly stats per sensor
