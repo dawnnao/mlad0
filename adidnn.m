@@ -1,4 +1,4 @@
-function sensor = adidnn(pathRoot, sensorNum, dateStart, dateEnd, sensorTrainRatio, sensorPSize, step, labelName)
+function sensor = adidnn(readRoot, saveRoot, sensorNum, dateStart, dateEnd, sensorTrainRatio, sensorPSize, step, labelName)
 % DESCRIPTION:
 %   This is a smart pre-processing(spp) function for bridge's structural
 %   health monitoring data. The work flow is: read tidy data -> assist user
@@ -123,7 +123,15 @@ sensor.label.name = labelName;
 
 %% 0 generate file and folder names
 sensorStr = tidyName(abbr(sensor.numVec));
-dirName.home = sprintf('%s--%s_sensor%s', date.start, date.end, sensorStr);
+if groupTotal == 1
+    netlayout = '_fusion';
+elseif groupTotal == sensorTotal
+    netlayout = '_parallel';
+elseif groupTotal > 1 && groupTotal < sensorTotal
+    netlayout = '_customGroups';
+end
+
+dirName.home = sprintf('%s/%s--%s_sensor%s%s', saveRoot, date.start, date.end, sensorStr, netlayout);
 dirName.file = [dirName.home '.mat'];
 
 if ~exist(dirName.home,'dir'), mkdir(dirName.home); end
@@ -169,7 +177,7 @@ for g = 1 : groupTotal
         end
 
         [~, sensor.date.vec{s}, sensor.date.serial{s}] = ...
-            glance(pathRoot, s, date.serial.start, date.serial.end, dirName.all{s}, '0-all_');
+            glance(readRoot, s, date.serial.start, date.serial.end, dirName.all{s}, '0-all_');
     %     util.hours = size(sensor.date.vec{s}, 1);
 
         elapsedTime(1) = toc(t(1)); [hours, mins, secs] = sec2hms(elapsedTime(1));
@@ -261,7 +269,7 @@ while goNext == 0
             sensor.label.manual{s}(:,sensor.random(n)) = zeros(labelTotal,1);  % initialize for re-label if necessary
             
             [random.date, random.hour] = colLocation(sensor.random(n), date.start);
-            random.path = [pathRoot '/' random.date '/' random.date sprintf(' %02d-VIB.mat',random.hour)];
+            random.path = [readRoot '/' random.date '/' random.date sprintf(' %02d-VIB.mat',random.hour)];
             
             if ~exist(random.path, 'file')
                 fprintf('\nCAUTION:\n%s\nNo such file! Filled with a zero.\n', random.path)
@@ -646,7 +654,7 @@ hourTotal = (date.serial.end-date.serial.start+1)*24;
 % anomaly detection
 fprintf('\nDetecting...\n')
 [labelTempNeural, countTempNeural, dateVec, dateSerial] = ...
-    classifierMulti(pathRoot, sensor.numVec, date.serial.start, date.serial.end, ...
+    classifierMulti(readRoot, sensor.numVec, date.serial.start, date.serial.end, ...
     dirName.home, sensor.label.name, sensor.neuralNet);
 for s = sensor.numVec
     sensor.label.neuralNet{s} = labelTempNeural{s};
