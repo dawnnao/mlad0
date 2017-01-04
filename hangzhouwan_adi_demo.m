@@ -2,7 +2,7 @@ clear;clc;close all;
 
 readRoot = '/Volumes/midDisk/hangzhouwan-2016Q1-tidy/netmanager_b';
 saveRoot = '/Users/tangzhiyi/Documents/MATLAB/adi/case';
-sensorNum = {1 2};
+sensorNum = {1};
 dateStart = '2016-01-01';
 dateEnd = '2016-01-01';
 sensorTrainRatio = 80/100;
