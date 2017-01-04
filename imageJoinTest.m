@@ -21,5 +21,11 @@ d = cat(1,cNew, bNew, a);
 
 saveas(d,'test.png');
 
+%%
+figure
+plot(1:10);
+
+a = gcf;
+
 
 
