@@ -676,8 +676,8 @@ fprintf('\n\n\nSTEP4:\nAnomaly detection completes, using %02dh%02dm%05.2fs .\n'
     hours, mins, secs)
 
 % ask go on or stop
-head = 'Continue to step5, automatically remove outliers?';
-tail = 'Continue to automatically remove outliers...';
+head = 'Continue to step5, anomaly statistics?';
+tail = 'Continue to do anomaly statistics...';
 savePath = [GetFullPath(dirName.home) '/' dirName.file];
 fprintf('\nSaving results...\nLocation: %s\n', savePath)
 if exist(savePath, 'file'), delete(savePath); end
@@ -841,6 +841,35 @@ elseif ismac
 end
 figure, imshow(imgLegend)
 saveas(gcf, [dirName.plotPano '/legend.png']); close
+
+elapsedTime(5) = toc(t(5)); [hours, mins, secs] = sec2hms(elapsedTime(5));
+fprintf('\n\n\nSTEP5:\nAnomaly statistics completes, using %02dh%02dm%05.2fs .\n', ...
+    hours, mins, secs)
+
+% ask go on or stop
+head = 'Continue to step6, automatically remove outliers?';
+tail = 'Continue to automatically remove outliers...';
+savePath = [GetFullPath(dirName.home) '/' dirName.file];
+fprintf('\nSaving results...\nLocation: %s\n', savePath)
+if exist(savePath, 'file'), delete(savePath); end
+save(savePath, '-v7.3')
+if isempty(step)
+    rightInput = 0;
+    while rightInput == 0
+        fprintf('\n%s\n', head)
+        prompt = 'y(yes)/n(no): ';
+        go = input(prompt,'s');
+        if strcmp(go,'y') || strcmp(go,'yes')
+            rightInput = 1; fprintf('\n%s\n\n\n', tail)
+        elseif strcmp(go,'n') || strcmp(go,'no')
+            rightInput = 1; fprintf('\nFinish.\n'), return
+        else fprintf('Invalid input! Please re-input.\n')
+        end
+    end
+elseif step == 5, fprintf('\nFinish.\n'), return
+elseif ismember(6, step), fprintf('\n%s\n\n\n', tail)
+end
+clear head tail savePath
 
 end
 
