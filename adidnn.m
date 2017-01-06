@@ -475,6 +475,7 @@ if ~isempty(step) && step(1) == 3
     step = newP{3,1};
     clear newP
 end
+
 t(3) = tic;
 dirName.formatIn = 'yyyy-mm-dd';
 date.serial.start = datenum(date.start, dirName.formatIn);  % day numbers from year 0000
@@ -571,11 +572,13 @@ for g = 1 : groupTotal
         saveas(temp.hFig, [dirName.net sprintf('/group-%d_netArchitecture.png', g)]);
         % close figure
         close(temp.hFig)
-
+        
+        figure
         plotperform(sensor.trainRecord{s});
         saveas(gcf,[dirName.net sprintf('/group-%d_netPerform.png', g)]);
         close
         
+        figure
         plotconfusion(feature{g}.label.manual(:,feature{g}.trainSize+1 : end), y);
         saveas(gcf,[dirName.net sprintf('/group-%d_netConfuse.png', g)]);
         close
@@ -637,24 +640,22 @@ if ismember(4, step) || isempty(step)
 if ~isempty(step) && step(1) == 4
     newP{2,1} = sensor.pSize;
     newP{3,1} = step;
+    newP{4,1} = sensor.label.name;
     
     readPath = [GetFullPath(dirName.home) '/' dirName.file];
     load(readPath)
     
     sensor.pSize =  newP{2,1};
     step = newP{3,1};
+    sensor.label.name = newP{4,1};
     clear newP
 end
+
 t(4) = tic;
 dirName.formatIn = 'yyyy-mm-dd';
 date.serial.start = datenum(date.start, dirName.formatIn);  % day numbers from year 0000
 date.serial.end   = datenum(date.end, dirName.formatIn);
 % hourTotal = (date.serial.end-date.serial.start+1)*24;
-
-labelNameTemp = sensor.label.name;
-savePath = [GetFullPath(dirName.home) '/' dirName.file];
-load(savePath)
-sensor.label.name = labelNameTemp;
 
 % anomaly detection
 fprintf('\nDetecting...\n')

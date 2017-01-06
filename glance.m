@@ -72,7 +72,7 @@ for day = dayStart : dayEnd
     end
 end
 count = count-1;
-close all
+close gcf
 clear data
 
 end
