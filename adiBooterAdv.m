@@ -55,6 +55,8 @@ function adiBooterAdv_OpeningFcn(hObject, eventdata, handles, varargin)
 % Choose default command line output for adiBooterAdv
 handles.output = hObject;
 handles.stepTemp = [];
+handles.labelName = [];
+handles.trainRatio = [];
 
 % Update handles structure
 guidata(hObject, handles);
@@ -269,4 +271,4 @@ if ~isempty(mainGUI)
     setappdata(mainGUI, 'trainRatio', handles.trainRatio);
 end
 guidata(hObject, handles);
-close(gcf)
+close(figure(adiBooterAdv))
