@@ -22,7 +22,7 @@ function varargout = adiBooter(varargin)
 
 % Edit the above text to modify the response to help adiBooter
 
-% Last Modified by GUIDE v2.5 06-Jan-2017 17:38:34
+% Last Modified by GUIDE v2.5 10-Jan-2017 08:44:33
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -59,7 +59,7 @@ handles.output = hObject;
 guidata(hObject, handles);
 
 % UIWAIT makes adiBooter wait for user response (see UIRESUME)
-% uiwait(handles.figure1);
+% uiwait(handles.adiBooter);
 
 
 % --- Outputs from this function are returned to the command line.
@@ -328,6 +328,9 @@ function pushbutton_advOption_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton_advOption (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+adiBooterAdv
+guidata(hObject, handles);
+
 
 % About %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % --- Executes on button press in pushbutton_about.
@@ -359,6 +362,15 @@ function pushbutton_Start_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 handles.readPath = get(handles.edit_readPath,'String');
 handles.savePath = get(handles.edit_savePath,'String');
+
+% subGUI = findobj('Tag','adiBooterAdv');
+% if ~isempty(subGUI)
+%     subData = guidata(subGUI);
+% end
+handles.step = getappdata(gcf, 'step');
+handles.labelName = getappdata(gcf, 'labelName');
+handles.trainRatio = getappdata(gcf, 'trainRatio');
+
 adidnn(handles.readPath, handles.savePath, handles.sensorNum, ...
-    handles.dateStart, handles.dateEnd, [], [], [], []);
+    handles.dateStart, handles.dateEnd, handles.trainRatio, [], handles.step, handles.labelName);
 guidata(hObject, handles);
