@@ -22,7 +22,7 @@ function varargout = adiBooterAdv(varargin)
 
 % Edit the above text to modify the response to pushbutton_help adiBooterAdv
 
-% Last Modified by GUIDE v2.5 10-Jan-2017 14:56:25
+% Last Modified by GUIDE v2.5 10-Jan-2017 15:44:30
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -58,7 +58,28 @@ handles.stepTemp = [];
 handles.labelName = [];
 handles.trainRatio = [];
 
-% Update handles structure
+mainGUI = findobj('Tag','adiBooter');
+if ~isempty(mainGUI)
+    if ~isempty(getappdata(figure(mainGUI), 'step'))
+        handles.step = getappdata(figure(mainGUI), 'step');
+        if ismember(1, handles.step)
+            set(handles.radiobutton_glance,'Value',1);
+        end
+        if ismember(2, handles.step)
+            set(handles.radiobutton_label,'Value',1);
+        end
+        if ismember(3, handles.step)
+            set(handles.radiobutton_train,'Value',1);
+        end
+        if ismember(4, handles.step)
+            set(handles.radiobutton_detect,'Value',1);
+        end
+        if ismember(5, handles.step)
+            set(handles.radiobutton_inspect,'Value',1);
+        end
+    end
+end
+
 guidata(hObject, handles);
 
 % UIWAIT makes adiBooterAdv wait for user response (see UIRESUME)
@@ -76,77 +97,78 @@ function varargout = adiBooterAdv_OutputFcn(hObject, eventdata, handles)
 varargout{1} = handles.output;
 
 % Work Flow %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% --- Executes on button press in glance.
-function glance_Callback(hObject, eventdata, handles)
-% hObject    handle to glance (see GCBO)
+% --- Executes on button press in radiobutton_glance.
+function radiobutton_glance_Callback(hObject, eventdata, handles)
+% hObject    handle to radiobutton_glance (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of glance
-if handles.glance.Value == 1
+% Hint: get(hObject,'Value') returns toggle state of radiobutton_glance
+if handles.radiobutton_glance.Value == 1
     handles.stepTemp{1} = 1;
+%     set(handles.radiobutton_glance,'Value',1);
 else
     handles.stepTemp{1} = [];
 end
 guidata(hObject, handles);
 
-% --- Executes on button press in label.
-function label_Callback(hObject, eventdata, handles)
-% hObject    handle to label (see GCBO)
+% --- Executes on button press in radiobutton_label.
+function radiobutton_label_Callback(hObject, eventdata, handles)
+% hObject    handle to radiobutton_label (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of label
-if handles.label.Value == 1
+% Hint: get(hObject,'Value') returns toggle state of radiobutton_label
+if handles.radiobutton_label.Value == 1
     handles.stepTemp{2} = 2;
 else
     handles.stepTemp{2} = [];
 end
 guidata(hObject, handles);
 
-% --- Executes on button press in train.
-function train_Callback(hObject, eventdata, handles)
-% hObject    handle to train (see GCBO)
+% --- Executes on button press in radiobutton_train.
+function radiobutton_train_Callback(hObject, eventdata, handles)
+% hObject    handle to radiobutton_train (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of train
-if handles.train.Value == 1
+% Hint: get(hObject,'Value') returns toggle state of radiobutton_train
+if handles.radiobutton_train.Value == 1
     handles.stepTemp{3} = 3;
 else
     handles.stepTemp{3} = [];
 end
 guidata(hObject, handles);
 
-% --- Executes on button press in detect.
-function detect_Callback(hObject, eventdata, handles)
-% hObject    handle to detect (see GCBO)
+% --- Executes on button press in radiobutton_detect.
+function radiobutton_detect_Callback(hObject, eventdata, handles)
+% hObject    handle to radiobutton_detect (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of detect
-if handles.detect.Value == 1
+% Hint: get(hObject,'Value') returns toggle state of radiobutton_detect
+if handles.radiobutton_detect.Value == 1
     handles.stepTemp{4} = 4;
 else
     handles.stepTemp{4} = [];
 end
 guidata(hObject, handles);
 
-% --- Executes on button press in inspect.
-function inspect_Callback(hObject, eventdata, handles)
-% hObject    handle to inspect (see GCBO)
+% --- Executes on button press in radiobutton_inspect.
+function radiobutton_inspect_Callback(hObject, eventdata, handles)
+% hObject    handle to radiobutton_inspect (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of inspect
-if handles.inspect.Value == 1
+% Hint: get(hObject,'Value') returns toggle state of radiobutton_inspect
+if handles.radiobutton_inspect.Value == 1
     handles.stepTemp{5} = 5;
 else
     handles.stepTemp{5} = [];
 end
 guidata(hObject, handles);
 
-% Label names & Manual train ratio %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% radiobutton_label names & Manual radiobutton_train ratio %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % --- If Enable == 'on', executes on mouse press in 5 pixel border.
 % --- Otherwise, executes on mouse press in 5 pixel border or over edit_labelName.
 function edit_labelName_ButtonDownFcn(hObject, eventdata, handles)
@@ -172,8 +194,8 @@ function edit_labelName_Callback(hObject, eventdata, handles)
 handles.labelName = get(handles.edit_labelName,'String');
 if isempty(handles.labelName)
     set(hObject, 'Enable', 'inactive');
-    set(handles.edit_sensorVar,'ForegroundColor', [0.494 0.494 0.494]);
-    set(handles.edit_sensorVar,'String', 'variable name');
+    set(handles.edit_labelName,'ForegroundColor', [0.494 0.494 0.494]);
+    set(handles.edit_labelName,'String', 'variable name');
 end
 guidata(hObject, handles);
 
@@ -274,7 +296,10 @@ function pushbutton_apply_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton_apply (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-handles.step = cell2mat(handles.stepTemp);
+if ~isempty(handles.stepTemp)
+    handles.step = cell2mat(handles.stepTemp);
+end
+
 mainGUI = findobj('Tag','adiBooter');
 if ~isempty(mainGUI)
     setappdata(mainGUI, 'step', handles.step);
@@ -288,8 +313,10 @@ function pushbutton_OK_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton_OK (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+if ~isempty(handles.stepTemp)
+    handles.step = cell2mat(handles.stepTemp);
+end
 
-handles.step = cell2mat(handles.stepTemp);
 mainGUI = findobj('Tag','adiBooter');
 if ~isempty(mainGUI)
     setappdata(mainGUI, 'step', handles.step);

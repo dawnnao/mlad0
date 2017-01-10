@@ -54,7 +54,9 @@ function adiBooter_OpeningFcn(hObject, eventdata, handles, varargin)
 
 % Choose default command line output for adiBooter
 handles.output = hObject;
-
+handles.step = [];
+handles.labelName = [];
+handles.trainRatio = [];
 % Update handles structure
 guidata(hObject, handles);
 
