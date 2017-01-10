@@ -282,6 +282,7 @@ function edit_sensorVar_Callback(hObject, eventdata, handles)
 % Hints: get(hObject,'String') returns contents of edit_sensorVar as text
 %        str2double(get(hObject,'String')) returns contents of edit_sensorVar as a double
 handles.sensorVar = get(handles.edit_sensorVar,'String');
+handles.sensorNum = evalin('base', handles.sensorVar);
 if isempty(handles.sensorVar)
     set(hObject, 'Enable', 'inactive');
     set(handles.edit_sensorVar,'ForegroundColor', [0.494 0.494 0.494]);
@@ -309,7 +310,6 @@ function pushbutton_preview_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 handles.preview = get(handles.edit_sensorVar,'String');
 if  ~strcmp(handles.preview, 'variable name')
-    handles.sensorNum = evalin('base', handles.sensorVar);
     if iscell(handles.sensorNum)
         handles.sensorNumVec = cell2mat(handles.sensorNum);
     else

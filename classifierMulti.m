@@ -108,7 +108,7 @@ end
 %     if isempty(check), rmdir(pathSaveType{l}, 's'); end
 % end
 
-close all
+close
 clear data
 
 end

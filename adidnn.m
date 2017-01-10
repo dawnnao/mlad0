@@ -970,7 +970,7 @@ save([dirName.home '/' dirName.file])
 elapsedTime(6) = toc(t(6)); [hours, mins, secs] = sec2hms(elapsedTime(1));
 fprintf('\nTime consumption: %02dh%02dm%05.2fs .\n', hours, mins, secs)
 fprintf('\nFinish!\n')
-close all
+close
 end
 
 end

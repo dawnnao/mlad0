@@ -22,7 +22,7 @@ function varargout = adiBooterAdv(varargin)
 
 % Edit the above text to modify the response to pushbutton_help adiBooterAdv
 
-% Last Modified by GUIDE v2.5 10-Jan-2017 10:49:23
+% Last Modified by GUIDE v2.5 10-Jan-2017 14:56:25
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -210,6 +210,25 @@ end
 guidata(hObject, handles);
 
 
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over edit_trainRatio.
+function edit_trainRatio_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to edit_trainRatio (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+set(hObject, 'Enable', 'On');
+
+% handles.trainRatio = str2num(get(handles.edit_trainRatio,'String'));
+handles.trainRatio = get(handles.edit_trainRatio,'String');
+
+if strcmp(handles.trainRatio, 'decimal')
+    set(handles.edit_trainRatio,'String', []);
+    set(handles.edit_trainRatio,'ForegroundColor', [0 0 0]);
+end
+uicontrol(hObject);
+guidata(hObject, handles);
+
+
 function edit_trainRatio_Callback(hObject, eventdata, handles)
 % hObject    handle to edit_trainRatio (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -219,6 +238,13 @@ function edit_trainRatio_Callback(hObject, eventdata, handles)
 %        str2double(get(hObject,'String')) returns contents of edit_trainRatio as a double
 
 handles.trainRatio = str2num(get(handles.edit_trainRatio,'String'));
+% handles.trainRatio = get(handles.edit_trainRatio,'String');
+
+if isempty(handles.trainRatio)
+    set(hObject, 'Enable', 'inactive');
+    set(handles.edit_trainRatio,'ForegroundColor', [0.494 0.494 0.494]);
+    set(handles.edit_trainRatio,'String', 'decimal');
+end
 guidata(hObject, handles);
 
 
