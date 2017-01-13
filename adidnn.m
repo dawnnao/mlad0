@@ -725,6 +725,14 @@ date.serial.start = datenum(date.start, dirName.formatIn);  % day numbers from y
 date.serial.end   = datenum(date.end, dirName.formatIn);
 hourTotal = (date.serial.end-date.serial.start+1)*24;
 
+import mlreportgen.dom.*;
+dirName.docFile = sprintf('%s--%s_sensor%s%s', date.start, date.end, sensorStr, netlayout);
+reportType = 'docx';
+doc = Document(dirName.docFile, reportType);
+append(doc, 'Anomaly Detection Auto-Report £¨Version: 0.1£©');
+paraObj = Paragraph('Panorama');
+append(doc, paraObj);
+
 % plot panorama
 dirName.plotPano = [dirName.home '/plot/panorama'];
 if ~exist(dirName.plotPano, 'dir'), mkdir(dirName.plotPano); end
@@ -735,6 +743,12 @@ for s = sensor.numVec
     fprintf('\nSenor-%02d anomaly detection panorama file location:\n%s\n', ...
         s, GetFullPath([dirName.plotPano '/' dirName.panorama{s}]))
     close
+    
+    imageObj = Image([dirName.plotPano '/' dirName.panorama{s}]);
+    imageObj.Width = '3in';
+    imageObj.Height = '3in';
+    append(doc,imageObj);
+    
     % update sensor.status
     sensor.status{s}(2,5) = {1};
 end
@@ -840,6 +854,8 @@ elseif ismac
 end
 figure, imshow(imgLegend)
 saveas(gcf, [dirName.plotPano '/legend.png']); close
+
+close(doc);
 
 elapsedTime(5) = toc(t(5)); [hours, mins, secs] = sec2hms(elapsedTime(5));
 fprintf('\n\n\nSTEP5:\nAnomaly statistics completes, using %02dh%02dm%05.2fs .\n', ...
