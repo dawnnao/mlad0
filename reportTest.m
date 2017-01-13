@@ -1,7 +1,23 @@
-clear all;clc;close all;
+function autoReport
 
 import mlreportgen.dom.*;
-report = Document('today');
-append(report, ['Today is ', date, '.']);
-close(report);
-rptview(report.OutputPath);
+
+reportType = 'docx';
+doc = Document('reportTest',reportType);
+append(doc, 'Hello World!');
+
+paraObj = Paragraph('This is a paragraph.');
+append(doc, paraObj);
+
+imageObj = Image(which('Python.png'));
+imageObj.Width = '1.5in';
+imageObj.Height = '1in';
+append(doc,imageObj);
+
+tableObj = Table(magic(6));
+append(doc,tableObj);
+
+close(doc);
+% rptview(doc.OutputPath);
+
+end
