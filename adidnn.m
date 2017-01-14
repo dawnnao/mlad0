@@ -710,6 +710,7 @@ if ismember(5, step) || isempty(step)
 if ~isempty(step) && step(1) == 5
     newP{2,1} = sensor.pSize;
     newP{3,1} = step;
+    newP{4,1} = dirName.home;
     
     readPath = [GetFullPath(dirName.home) '/' dirName.file];
     fprintf('Loading...\n')
@@ -717,6 +718,7 @@ if ~isempty(step) && step(1) == 5
     
     sensor.pSize =  newP{2,1};
     step = newP{3,1};
+    dirName.home = newP{4,1};
     clear newP
 end
 t(5) = tic;
@@ -725,33 +727,22 @@ date.serial.start = datenum(date.start, dirName.formatIn);  % day numbers from y
 date.serial.end   = datenum(date.end, dirName.formatIn);
 hourTotal = (date.serial.end-date.serial.start+1)*24;
 
-import mlreportgen.dom.*;
-dirName.docFile = sprintf('%s--%s_sensor%s%s', date.start, date.end, sensorStr, netlayout);
-reportType = 'docx';
-doc = Document(dirName.docFile, reportType);
-append(doc, 'Anomaly Detection Auto-Report £¨Version: 0.1£©');
-paraObj = Paragraph('Panorama');
-append(doc, paraObj);
+reportCover; % make report cover
 
 % plot panorama
 dirName.plotPano = [dirName.home '/plot/panorama'];
 if ~exist(dirName.plotPano, 'dir'), mkdir(dirName.plotPano); end
-for s = sensor.numVec
-    panorama(sensor.date.serial{s}, sensor.label.neuralNet{s}, sprintf('        %02d', s), color(1:labelTotal));
-    dirName.panorama{s} = [sprintf('%s--%s_sensor_%02d', date.start, date.end, s) '_anomalyDetectionPanorama.png'];
-    saveas(gcf,[dirName.plotPano '/' dirName.panorama{s}]);
-    fprintf('\nSenor-%02d anomaly detection panorama file location:\n%s\n', ...
-        s, GetFullPath([dirName.plotPano '/' dirName.panorama{s}]))
-    close
-    
-    imageObj = Image([dirName.plotPano '/' dirName.panorama{s}]);
-    imageObj.Width = '3in';
-    imageObj.Height = '3in';
-    append(doc,imageObj);
-    
-    % update sensor.status
-    sensor.status{s}(2,5) = {1};
-end
+% for s = sensor.numVec
+%     panorama(sensor.date.serial{s}, sensor.label.neuralNet{s}, sprintf('        %02d', s), color(1:labelTotal));
+%     dirName.panorama{s} = [sprintf('%s--%s_sensor_%02d', date.start, date.end, s) '_anomalyDetectionPanorama.png'];
+%     saveas(gcf,[dirName.plotPano '/' dirName.panorama{s}]);
+%     fprintf('\nSenor-%02d anomaly detection panorama file location:\n%s\n', ...
+%         s, GetFullPath([dirName.plotPano '/' dirName.panorama{s}]))
+%     close
+%     
+%     % update sensor.status
+%     sensor.status{s}(2,5) = {1};
+% end
 
 n = 0;
 panopano = [];
@@ -768,6 +759,9 @@ end
 dirName.panopano = [sprintf('%s--%s_sensor_all%s', date.start, date.end, sensorStr) ...
                     '_anomalyDetectionPanorama.png'];
 imwrite(panopano, [dirName.plotPano '/' dirName.panopano]);
+
+reportPano; % make report chapter - Panorama
+
 clear height width p n
 
 % % plot monthly stats per sensor
@@ -810,52 +804,50 @@ clear height width p n
 %     end
 % end
 
-% plot sensor-type bar stats
-dirName.plotSum = [dirName.home '/plot/statsSumUp'];
-if ~exist(dirName.plotSum, 'dir'), mkdir(dirName.plotSum); end
-for s = sensor.numVec
-   for l = 1 : labelTotal
-       statsSum(s, l) = length(find(sensor.label.neuralNet{s} == l));
-   end
-end
+% % plot sensor-type bar stats
+% dirName.plotSum = [dirName.home '/plot/statsSumUp'];
+% if ~exist(dirName.plotSum, 'dir'), mkdir(dirName.plotSum); end
+% for s = sensor.numVec
+%    for l = 1 : labelTotal
+%        statsSum(s, l) = length(find(sensor.label.neuralNet{s} == l));
+%    end
+% end
+% 
+% if ~isempty(statsSum(1,1)) && size(statsSum, 1) == 1
+%     statsSum(2,1:labelTotal) = 0;
+% end
+% 
+% figure
+% h = bar(statsSum, 'stacked');
+% xlabel('Sensor');
+% ylabel('Count (hours)');
+% legend(sensor.label.name);
+% lh=findall(gcf,'tag','legend');
+% set(lh,'location','northeastoutside');
+% title(sprintf('%s--%s', date.start, date.end));
+% grid on
+% for n = 1 : labelTotal
+%     set(h(n),'FaceColor', color{n});
+% end
+% set(gca, 'fontsize', 12);
+% 
+% dirName.statsSum = sprintf('%s--%s_sensor%s_anomalyStats.png', ...
+%     date.start, date.end, sensorStr);
+% saveas(gcf,[dirName.plotSum '/' dirName.statsSum]);
+% fprintf('\nSum-up anomaly stats image file location:\n%s\n', ...
+%     GetFullPath([dirName.plotSum '/' dirName.statsSum]))
+% close
 
-if ~isempty(statsSum(1,1)) && size(statsSum, 1) == 1
-    statsSum(2,1:labelTotal) = 0;
-end
-
-figure
-h = bar(statsSum, 'stacked');
-xlabel('Sensor');
-ylabel('Count (hours)');
-legend(sensor.label.name);
-lh=findall(gcf,'tag','legend');
-set(lh,'location','northeastoutside');
-title(sprintf('%s--%s', date.start, date.end));
-grid on
-for n = 1 : labelTotal
-    set(h(n),'FaceColor', color{n});
-end
-set(gca, 'fontsize', 12);
-
-dirName.statsSum = sprintf('%s--%s_sensor%s_anomalyStats.png', ...
-    date.start, date.end, sensorStr);
-saveas(gcf,[dirName.plotSum '/' dirName.statsSum]);
-fprintf('\nSum-up anomaly stats image file location:\n%s\n', ...
-    GetFullPath([dirName.plotSum '/' dirName.statsSum]))
-close
-
-% crop legend to panorama's folder
-img = imread([dirName.plotSum '/' dirName.statsSum]);
-if ispc
-    imgLegend = imcrop(img, [646.5 42.5 172 300]);
-elseif ismac
-%     imgLegend = imcrop(img, [660.5 42.5 160 229]);
-    imgLegend = imcrop(img, [882.5 57.5 204 280]);
-end
-figure, imshow(imgLegend)
-saveas(gcf, [dirName.plotPano '/legend.png']); close
-
-close(doc);
+% % crop legend to panorama's folder
+% img = imread([dirName.plotSum '/' dirName.statsSum]);
+% if ispc
+%     imgLegend = imcrop(img, [646.5 42.5 172 300]);
+% elseif ismac
+% %     imgLegend = imcrop(img, [660.5 42.5 160 229]);
+%     imgLegend = imcrop(img, [882.5 57.5 204 280]);
+% end
+% figure, imshow(imgLegend)
+% saveas(gcf, [dirName.plotPano '/legend.png']); close
 
 elapsedTime(5) = toc(t(5)); [hours, mins, secs] = sec2hms(elapsedTime(5));
 fprintf('\n\n\nSTEP5:\nAnomaly statistics completes, using %02dh%02dm%05.2fs .\n', ...

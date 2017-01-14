@@ -1,8 +1,10 @@
 clear;clc;close all;
 
-% readRoot = '/Volumes/midDisk/sutong-2012-tidy';
-readRoot = 'G:/sutong-2012-tidy';
-saveRoot = 'F:/adi';
+% readRoot = 'G:/sutong-2012-tidy';
+% saveRoot = 'F:/adi';
+readRoot = '/Volumes/bigDisk/sutong-2012-tidy';
+saveRoot = '/Volumes/bigDisk/';
+
 for n = 1 : 38, sensorNum{n} = n; end
 % sensorNum = [1:38];
 dateStart = '2012-01-01';
