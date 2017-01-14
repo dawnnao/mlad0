@@ -52,58 +52,98 @@ dateObj.FontSize = '18';
 dateObj.HAlign = 'center';
 append(doc, dateObj);
 
-br = PageBreak();
-append(doc, br);
+% s = doc.CurrentDOCXSection;
 
-headObj1 = Heading1('Panorama');
-append(doc, headObj1);
+sect{1} = DOCXPageLayout;
+sect{1}.PageSize.Orientation = 'landscape';
+sect{1}.PageHeaders = 'pageHeader';
+sect{1}.PageSize.Height = '8.5in';
+sect{1}.PageSize.Width = '11in';
+append(doc, sect{1});
 
-paraObj = Paragraph('This is a auto-report test.');
-append(doc, paraObj);
-
-
-close(doc);
 %% Panorama
-imageObj = Image(which('Python.png'));
-imageObj.Width = '3in';
-imageObj.Height = '3in';
-% append(doc,imageObj);
+% s{1} = doc.CurrentDOCXSection;
+% s{1}.PageSize.Orientation = 'landscape';
+% s{1}.PageSize.Height = '8.5in';
+% s{1}.PageSize.Width = '11in';
 
+paraObj{1} = Paragraph('This is an auto-report test.');
+append(doc, paraObj{1});
 
+headObj{1} = Heading1('Panorama');
+append(doc, headObj{1});
+
+imageObj{1} = Image(which('Python.png'));
+imageObj{1}.Width = '3in';
+imageObj{1}.Height = '3in';
 % imageRotate = imread(which('Python.png'));
 % imageRotate = imrotate(imageRotate, 90);
 % imshow(imageRotate);
 
-tableObj = Table(2);
-
+tableObj{1} = Table(2);
 row = TableRow();
-append(row, TableEntry(imageObj));
+append(row, TableEntry(imageObj{1}));
 append(row, TableEntry('Col2'));
-append(tableObj,row);
-
+append(tableObj{1},row);
 row = TableRow();
 append(row,TableEntry('data11'));
 append(row,TableEntry('data12'));
-append(tableObj,row);
+append(tableObj{1},row);
+append(doc, tableObj{1});
 
-append(doc, tableObj);
+paraObj{2} = Paragraph('End of Panorama.');
+% append(doc, paraObj{2});
 
-% append(doc,tableObj);
+% s = doc.CurrentDOCXSection;
+% s.SectionBreak  = true;
 
-% tableObj = Table(zeros(2,1));
-% append(doc,tableObj);
+% br{1} = PageBreak();
+% append(doc ,br{1});
 
-% t1 = row(tableObj,1);
-% append(t1, imageObj);
+sect{2} = DOCXPageLayout;
+sect{2}.PageSize.Orientation = 'portrait';
+% sect{2}.PageHeaders = 'pageHeader';
+% sect{2}.SectionBreak = 'Next Page';
+append(doc, paraObj{2}, sect{2});
 
+%% Statistics by sensor
+% s = doc.CurrentDOCXSection;
+% s.SectionBreak  = true;
 
+headObj{2} = Heading1('Statistics by sensor');
+append(doc, headObj{2});
 
+imageObj{2} = Image(which('Python.png'));
+imageObj{2}.Width = '3in';
+imageObj{2}.Height = '3in';
+% imageRotate = imread(which('Python.png'));
+% imageRotate = imrotate(imageRotate, 90);
+% imshow(imageRotate);
 
-% headObj2 = Heading1('Statistics by sensor');
-% append(doc, headObj2);
+tableObj{2} = Table(2);
+row = TableRow();
+append(row, TableEntry(imageObj{2}));
+append(row, TableEntry('Col2'));
+append(tableObj{2},row);
+row = TableRow();
+append(row,TableEntry('data11'));
+append(row,TableEntry('data12'));
+append(tableObj{2},row);
+append(doc, tableObj{2});
+
+paraObj{2} = Paragraph('End of Panorama.');
+append(doc, paraObj{2});
+
+% sect{2} = DOCXPageLayout(2);
+% sect{2}.PageSize.Orientation = 'portrait';
+% append(doc, sect{2});
+
+% sect{3} = DOCXPageLayout;
+% append(doc, sect{3});
+
+%%
 
 close(doc);
-
 % rptview(doc.OutputPath);
 
 
