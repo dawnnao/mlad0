@@ -1,20 +1,18 @@
 import mlreportgen.dom.*
-rpt = Document('test','docx');
+rpt = Document('test','pdf');
 
 append(rpt,Heading(1,'Magic Square Report','Heading 1'));
 
-sect = DOCXPageLayout;
-sect.PageSize.Orientation = 'landscape';
-sect.PageSize.Height = '8.5in';
-sect.PageSize.Width = '11in';
-append(rpt,Paragraph('The next page shows a magic square.'),sect);
+sect1 = DOCXPageLayout;
+sect1.PageSize.Orientation = 'landscape';
+sect1.PageSize.Height = '8.5in';
+sect1.PageSize.Width = '11in';
+append(rpt,Paragraph('The next page shows a magic square.'),sect1);
  
 table = append(rpt,magic(22));
 table.Border = 'solid';
 table.ColSep = 'solid';
 table.RowSep = 'solid';
-
-
 
 
 append(rpt,Heading(1,'Magic Square Report','Heading 1'));
