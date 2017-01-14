@@ -50,11 +50,12 @@ for n = c+1 : cNew
     append(doc, blankObj{n});
 end
 
-dateObj = Paragraph(date);
+dateObj = Paragraph();
 dateObj.Bold = false;
 dateObj.FontSize = '18';
 dateObj.HAlign = 'center';
 append(doc, dateObj);
+append(dateObj, date);
 
 % s = doc.CurrentDOCXSection;
 

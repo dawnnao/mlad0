@@ -10,7 +10,7 @@ for n = cBlank+1 : cBlankNew
     append(doc, blankObj{n});
 end
 
-titleObj{1} = Paragraph('Anomaly Detection Auto-Report');
+titleObj{1} = Paragraph('SHM Data Anomaly Detection Auto-Report');
 titleObj{1}.Bold = false;
 titleObj{1}.FontSize = '26';
 titleObj{1}.HAlign = 'center';
@@ -42,11 +42,13 @@ for n = cBlank+1 : cBlankNew
     append(doc, blankObj{n});
 end
 
-% dateStr = date;
-dateObj = Paragraph('2017-01-14');
+% dateObj = Paragraph(datetime('now','Format','yyyy-MM-dd'));
+% datestr(datetime('now'),'yyyy-MM-dd');
+dateObj = Paragraph(datestr(datetime('now'),'yyyy-mm-dd'));
 dateObj.Bold = false;
 dateObj.FontSize = '18';
 dateObj.HAlign = 'center';
+% append(dateObj, ['' datetime('now','Format','yyyy-MM-dd') '']);
 append(doc, dateObj);
 
 cPageBreak = 1; br{cPageBreak} = PageBreak();
