@@ -4,6 +4,11 @@ reportType = 'docx';
 doc = Document('docTrial', reportType);
 
 %% Cover
+
+sectCurrent{1} = doc.CurrentPageLayout;
+sectCurrent{1}.PageHeaders = 'pageHeader';
+
+
 c = 0;
 frag = 4;
 cNew = c + frag;
@@ -25,7 +30,7 @@ titleObj{2}.HAlign = 'center';
 append(doc, titleObj{2});
 
 c = cNew;
-frag = 12;
+frag = 4; % 12
 cNew = c + frag;
 for n = c+1 : cNew
     blankObj{n} = Paragraph('');
@@ -56,10 +61,68 @@ append(doc, dateObj);
 
 sect{1} = DOCXPageLayout;
 sect{1}.PageSize.Orientation = 'landscape';
-sect{1}.PageHeaders = 'pageHeader';
+sect{1}.SectionBreak = 'Same Page';
 sect{1}.PageSize.Height = '8.5in';
 sect{1}.PageSize.Width = '11in';
 append(doc, sect{1});
+
+%% Cover 2
+c = cNew;
+frag = 1;
+cNew = c + frag;
+for n = c+1 : cNew
+    blankObj{n} = Paragraph('');
+    append(doc, blankObj{n});
+end
+
+titleObj{3} = Paragraph('Anomaly Detection Auto-Report');
+titleObj{3}.Bold = false;
+titleObj{3}.FontSize = '26';
+titleObj{3}.HAlign = 'center';
+append(doc, titleObj{3});
+
+titleObj{4} = Paragraph('£¨Version: 0.1£©');
+titleObj{4}.Bold = false;
+titleObj{4}.FontSize = '18';
+titleObj{4}.HAlign = 'center';
+append(doc, titleObj{4});
+
+c = cNew;
+frag = 12;
+cNew = c + frag;
+for n = c+1 : cNew
+    blankObj{n} = Paragraph('');
+    append(doc, blankObj{n});
+end
+
+% arthurObj = Paragraph('Center of Structural Monitoring and Control');
+% arthurObj.Bold = false;
+% arthurObj.FontSize = '18';
+% arthurObj.HAlign = 'center';
+% append(doc, arthurObj);
+
+% c = cNew;
+% frag = 2;
+% cNew = c + frag;
+% for n = c+1 : cNew
+%     blankObj{n} = Paragraph('');
+%     append(doc, blankObj{n});
+% end
+
+% dateObj = Paragraph(date);
+% dateObj.Bold = false;
+% dateObj.FontSize = '18';
+% dateObj.HAlign = 'center';
+% append(doc, dateObj);
+
+% s = doc.CurrentDOCXSection;
+
+% sect{3} = DOCXPageLayout;
+% sect{3}.PageSize.Orientation = 'landscape';
+% sect{3}.PageHeaders = 'pageHeader';
+% sect{3}.PageSize.Height = '8.5in';
+% sect{3}.PageSize.Width = '11in';
+% append(doc, sect{3});
 
 %% Panorama
 % s{1} = doc.CurrentDOCXSection;
@@ -100,18 +163,18 @@ paraObj{2} = Paragraph('End of Panorama.');
 % br{1} = PageBreak();
 % append(doc ,br{1});
 
-sect{2} = DOCXPageLayout;
-sect{2}.PageSize.Orientation = 'portrait';
+% sect{2} = DOCXPageLayout;
+% sect{2}.PageSize.Orientation = 'portrait';
 % sect{2}.PageHeaders = 'pageHeader';
 % sect{2}.SectionBreak = 'Next Page';
-append(doc, paraObj{2}, sect{2});
+% append(doc, paraObj{2}, sect{2});
 
 %% Statistics by sensor
 % s = doc.CurrentDOCXSection;
 % s.SectionBreak  = true;
 
-headObj{2} = Heading1('Statistics by sensor');
-append(doc, headObj{2});
+% headObj{2} = Heading1('Statistics by sensor');
+% append(doc, headObj{2});
 
 imageObj{2} = Image(which('Python.png'));
 imageObj{2}.Width = '3in';
