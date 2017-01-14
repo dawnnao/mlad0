@@ -78,14 +78,18 @@ append(doc, paraObj{1});
 headObj{1} = Heading1('Panorama');
 append(doc, headObj{1});
 
+img = imread(which('Python.png'));
+
 imageObj{1} = Image(which('Python.png'));
 imageObj{1}.Width = '3in';
 imageObj{1}.Height = '3in';
 % imageObj{1}.VAlign = 'middle';
-imageObj{1}.StyleName = 'Quote';
+% imageObj{1}.StyleName = 'Quote';
 % imageObj{1}.Style = {ScaleToFit};
 % imageObj{1}.HAlign = 'center';
-append(doc, Paragraph(imageObj{1}));
+imagePara = Paragraph(imageObj{1});
+imagePara.HAlign = 'center';
+append(doc, imagePara);
 
 tableObj{1} = Table(2);
 row = TableRow();

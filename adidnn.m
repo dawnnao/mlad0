@@ -859,7 +859,7 @@ tail = 'Continue to automatically remove outliers...';
 savePath = [GetFullPath(dirName.home) '/' dirName.file];
 fprintf('\nSaving results...\nLocation: %s\n', savePath)
 if exist(savePath, 'file'), delete(savePath); end
-save(savePath, '-v7.3')
+% save(savePath, '-v7.3')
 if isempty(step)
     rightInput = 0;
     while rightInput == 0
