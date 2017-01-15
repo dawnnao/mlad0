@@ -134,16 +134,31 @@ imageObj{2}.Height = '3in';
 % imageRotate = imrotate(imageRotate, 90);
 % imshow(imageRotate);
 
-tableObj{2} = Table(2);
+tableObj{2} = Table(3);
 row = TableRow();
-append(row, TableEntry(imageObj{2}));
-append(row, TableEntry('Col2'));
-append(tableObj{2},row);
-row = TableRow();
-append(row,TableEntry('data11'));
-append(row,TableEntry('data12'));
-append(tableObj{2},row);
+c = 1;
+sensor.numVec = 1:38;
+for s = sensor.numVec
+    imgsize = size(imread(which('Python.png')));
+    width = [num2str(2 * imgsize(2)/imgsize(1)) 'in'];
+    imageSPS{s} = Image(which('Python.png'));
+    imageSPS{s}.Height = '2in';
+    imageSPS{s}.Width = width;
+    append(row, TableEntry(imageSPS{s}));
+    if mod(c,3) == 0
+        append(tableObj{2},row);
+        row = TableRow();
+    end
+    c = c + 1;
+end
+
+% tablePara{1} = Paragraph(tableObj{2});
+% tablePara{1}.HAlign = 'center';
+% append(doc, tablePara{1});
+
+tableObj{2}.HAlign = 'center';
 append(doc, tableObj{2});
+
 
 paraObj{2} = Paragraph('End of Panorama.');
 append(doc, paraObj{2});
