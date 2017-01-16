@@ -56,6 +56,7 @@ function adiBooter_OpeningFcn(hObject, eventdata, handles, varargin)
 handles.output = hObject;
 handles.step = [];
 handles.labelNameVar = [];
+handles.labelName = [];
 handles.trainRatio = [];
 % Update handles structure
 guidata(hObject, handles);
@@ -356,6 +357,10 @@ function pushbutton_quit_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton_quit (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+checkSubGUI = findobj(0,'Name', 'adiBooterAdv');
+close(checkSubGUI); 
+
 close(gcf)
 
 % Start %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -372,9 +377,9 @@ handles.savePath = get(handles.edit_savePath,'String');
 %     subData = guidata(subGUI);
 % end
 handles.step = getappdata(figure(adiBooter), 'step');
-handles.labelNameVar = getappdata(figure(adiBooter), 'labelNameVar');
+handles.labelName = getappdata(figure(adiBooter), 'labelName');
 handles.trainRatio = getappdata(figure(adiBooter), 'trainRatio');
 
 adidnn(handles.readPath, handles.savePath, handles.sensorNum, ...
-    handles.dateStart, handles.dateEnd, handles.trainRatio, [], handles.step, handles.labelNameVar);
+    handles.dateStart, handles.dateEnd, handles.trainRatio, [], handles.step, handles.labelName);
 guidata(hObject, handles);

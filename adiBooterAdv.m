@@ -177,7 +177,7 @@ function edit_labelName_ButtonDownFcn(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles.labelNameVar = get(handles.edit_labelName,'String');
-if strcmp(handles.labelNameVar, 'variable name')
+if strcmp(handles.labelNameVar, 'variable name') || ~isempty(handles.labelNameVar)
     set(hObject, 'Enable', 'On');
     set(handles.edit_labelName,'String', []);
     set(handles.edit_labelName,'ForegroundColor', [0 0 0]);
@@ -346,6 +346,7 @@ end
 if ~isempty(handles.mainGUI)
     setappdata(handles.mainGUI, 'step', handles.step);
     setappdata(handles.mainGUI, 'labelNameVar', handles.labelNameVar);
+    setappdata(handles.mainGUI, 'labelName', handles.labelName);
 %     setappdata(handles.mainGUI, 'labelName', handles.labelName);
     setappdata(handles.mainGUI, 'trainRatio', handles.trainRatio);
 end
