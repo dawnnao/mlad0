@@ -55,7 +55,7 @@ function adiBooter_OpeningFcn(hObject, eventdata, handles, varargin)
 % Choose default command line output for adiBooter
 handles.output = hObject;
 handles.step = [];
-handles.labelName = [];
+handles.labelNameVar = [];
 handles.trainRatio = [];
 % Update handles structure
 guidata(hObject, handles);
@@ -371,10 +371,10 @@ handles.savePath = get(handles.edit_savePath,'String');
 % if ~isempty(subGUI)
 %     subData = guidata(subGUI);
 % end
-handles.step = getappdata(gcf, 'step');
-handles.labelName = getappdata(gcf, 'labelName');
-handles.trainRatio = getappdata(gcf, 'trainRatio');
+handles.step = getappdata(figure(adiBooter), 'step');
+handles.labelNameVar = getappdata(figure(adiBooter), 'labelNameVar');
+handles.trainRatio = getappdata(figure(adiBooter), 'trainRatio');
 
 adidnn(handles.readPath, handles.savePath, handles.sensorNum, ...
-    handles.dateStart, handles.dateEnd, handles.trainRatio, [], handles.step, handles.labelName);
+    handles.dateStart, handles.dateEnd, handles.trainRatio, [], handles.step, handles.labelNameVar);
 guidata(hObject, handles);
