@@ -286,22 +286,6 @@ function pushbutton_help_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% % --- Executes on button press in pushbutton_apply.
-% function pushbutton_apply_Callback(hObject, eventdata, handles)
-% % hObject    handle to pushbutton_apply (see GCBO)
-% % eventdata  reserved - to be defined in a future version of MATLAB
-% % handles    structure with handles and user data (see GUIDATA)
-% if ~isempty(handles.stepTemp)
-%     handles.step = cell2mat(handles.stepTemp);
-% end
-% 
-% % handles.mainGUI = findobj('Tag','adiBooter');
-% if ~isempty(handles.mainGUI)
-%     setappdata(handles.mainGUI, 'step', handles.step);
-%     setappdata(handles.mainGUI, 'labelName', handles.labelName);
-%     setappdata(handles.mainGUI, 'trainRatio', handles.trainRatio);
-% end
-% guidata(hObject, handles);
 
 % --- Executes on button press in pushbutton_OK.
 function pushbutton_OK_Callback(hObject, eventdata, handles)

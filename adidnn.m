@@ -123,16 +123,17 @@ sensor.label.name = labelName;
 
 %% 0 generate file and folder names
 sensorStr = tidyName(abbr(sensor.numVec));
-if groupTotal == 1
-    netlayout = '_fusion';
-elseif groupTotal == sensorTotal
-    netlayout = '_parallel';
+if groupTotal == sensorTotal
+    handles.netlayout = '_parallel';
+elseif groupTotal == 1
+    handles.netlayout = '_fusion';
 elseif groupTotal > 1 && groupTotal < sensorTotal
     netlayout = '_customGroups';
 end
 
 dirName.home = sprintf('%s/%s--%s_sensor%s%s', saveRoot, date.start, date.end, sensorStr, netlayout);
 dirName.file = sprintf('%s--%s_sensor%s%s.mat', date.start, date.end, sensorStr, netlayout);
+dirName.status = sprintf('%s--%s_sensor%s%s_status.mat', date.start, date.end, sensorStr, netlayout);
 
 if ~exist(dirName.home,'dir'), mkdir(dirName.home); end
 for g = 1 : groupTotal
@@ -183,13 +184,17 @@ for g = 1 : groupTotal
         elapsedTime(1) = toc(t(1)); [hours, mins, secs] = sec2hms(elapsedTime(1));
         fprintf('\nSTEP1:\nSensor-%02d data plot completes, using %02d:%02d:%05.2f .\n', ...
             s, hours, mins, secs)
-
-        % work flow status
-        sensor.status{s} = {'1.dataGlance' '2.traningSetMake' '3.dataClassify'...
-                 '4.outlierRemove' '5.compressSensingRecover'; 0 0 0 0 0};
-        sensor.status{s}(2,1) = {1};
     end
 end
+
+% update work flow status
+sensor.status{s} = {'1-Glance' '2-Label' '3-Train' '4-Detect' '5-Inspect' ...
+                     ; 0 0 0 0 0};
+sensor.status{s}(2,1) = {1};
+status = sensor.status{s};
+savePath = [GetFullPath(dirName.home) '/' dirName.status];
+if exist(savePath, 'file'), delete(savePath); end
+save(savePath, '-v7.3')
 
 % ask go on or stop
 head = 'Continue to step2, label some data for building neural networks?';
@@ -398,8 +403,11 @@ while goNext == 0
     
 end
 
-% update sensor.status
-sensor.status{s}(2,2) = {1};
+% update work flow status
+status(2,2) = {1};
+savePath = [GetFullPath(dirName.home) '/' dirName.status];
+if exist(savePath, 'file'), delete(savePath); end
+save(savePath, '-v7.3')
 
 elapsedTime(2) = toc(t(2)); [hours, mins, secs] = sec2hms(elapsedTime(2));
 fprintf('\n\n\nSTEP2:\nSensor(s) training set making completes, using %02d:%02d:%05.2f .\n', ...
@@ -606,6 +614,12 @@ elapsedTime(3) = toc(t(3)); [hours, mins, secs] = sec2hms(elapsedTime(3));
 fprintf('\n\n\nSTEP3:\nDeep neural network(s) training completes, using %02dh%02dm%05.2fs .\n', ...
     hours, mins, secs)
 
+% update work flow status
+status(2,3) = {1};
+savePath = [GetFullPath(dirName.home) '/' dirName.status];
+if exist(savePath, 'file'), delete(savePath); end
+save(savePath, '-v7.3')
+
 % ask go on or stop
 head = 'Continue to step4 - anomaly detection?';
 tail = 'Continue to anomaly detection...';
@@ -675,6 +689,12 @@ clear labelTempNeural countTempNeural
 elapsedTime(4) = toc(t(4)); [hours, mins, secs] = sec2hms(elapsedTime(4));
 fprintf('\n\n\nSTEP4:\nAnomaly detection completes, using %02dh%02dm%05.2fs .\n', ...
     hours, mins, secs)
+
+% update work flow status
+status(2,4) = {1};
+savePath = [GetFullPath(dirName.home) '/' dirName.status];
+if exist(savePath, 'file'), delete(savePath); end
+save(savePath, '-v7.3')
 
 % ask go on or stop
 head = 'Continue to step5, anomaly statistics?';
@@ -854,6 +874,12 @@ saveas(gcf, [dirName.plotPano '/legend.png']); close
 elapsedTime(5) = toc(t(5)); [hours, mins, secs] = sec2hms(elapsedTime(5));
 fprintf('\n\n\nSTEP5:\nAnomaly statistics completes, using %02dh%02dm%05.2fs .\n', ...
     hours, mins, secs)
+
+% update work flow status
+status(2,5) = {1};
+savePath = [GetFullPath(dirName.home) '/' dirName.status];
+if exist(savePath, 'file'), delete(savePath); end
+save(savePath, '-v7.3')
 
 % ask go on or stop
 head = 'Continue to step6, automatically remove outliers?';

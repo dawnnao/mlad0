@@ -331,7 +331,43 @@ function pushbutton_advOption_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton_advOption (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+% unfinish! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% if isfield(handles, 'sensorNum') && isfield(handles, 'dateStart') && isfield(handles, 'dateEnd')
+%     if ~iscell(handles.sensorNum), handles.sensorNum = {handles.sensorNum}; end
+%     groupTotal = length(handles.sensorNum(:));
+%     handles.sensorNumVec = [];
+%     for g = 1 : groupTotal, handles.sensorNumVec = [handles.sensorNumVec handles.sensorNum{g}(:)']; end
+%     handles.sensorStr = tidyName(abbr(handles.sensorNumVec));
+%     if groupTotal == sensorTotal
+%         handles.netlayout = '_parallel';
+%     elseif groupTotal == 1
+%         handles.netlayout = '_fusion';
+%     elseif groupTotal > 1 && groupTotal < sensorTotal
+%         handles.netlayout = '_customGroups';
+%     end
+%     handles.dirName.home = sprintf('%s/%s--%s_sensor%s%s', saveRoot, handles.dateStart, handles.dateEnd, handles.sensorStr, handles.netlayout);
+%     handles.dirName.status = sprintf('%s--%s_sensor%s%s_status.mat', handles.dateStart, handles.dateEnd, handles.sensorStr, handles.netlayout);
+%     
+%     if exist(GetFullPath(handles.dirName.home), 'dir')
+%         if exist([GetFullPath(handles.dirName.home) '/' handles.dirName.status], 'file')
+%             load([GetFullPath(handles.dirName.home) '/' handles.dirName.status]);
+%             fprintf('STATUS:\n');
+%             for n = 1:5
+%                 fprintf('%s: %s\n', cell2mat(status(1,n)), num2str(cell2mat(status(2,n))));
+%             end
+%         else
+%             fprintf('Status file missing.\n');
+%         end
+%     else
+%         fprintf('Brand new start!\n');
+%     end
+% else
+%     fprintf('Not enough input, status unknown.');
+% end
+
 adiBooterAdv
+
 guidata(hObject, handles);
 
 
