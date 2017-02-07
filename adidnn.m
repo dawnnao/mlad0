@@ -124,16 +124,16 @@ sensor.label.name = labelName;
 %% 0 generate file and folder names
 sensorStr = tidyName(abbr(sensor.numVec));
 if groupTotal == sensorTotal
-    handles.netlayout = '_parallel';
+    netLayout = '_parallel';
 elseif groupTotal == 1
-    handles.netlayout = '_fusion';
+    netLayout = '_fusion';
 elseif groupTotal > 1 && groupTotal < sensorTotal
-    netlayout = '_customGroups';
+    netLayout = '_customGroups';
 end
 
-dirName.home = sprintf('%s/%s--%s_sensor%s%s', saveRoot, date.start, date.end, sensorStr, netlayout);
-dirName.file = sprintf('%s--%s_sensor%s%s.mat', date.start, date.end, sensorStr, netlayout);
-dirName.status = sprintf('%s--%s_sensor%s%s_status.mat', date.start, date.end, sensorStr, netlayout);
+dirName.home = sprintf('%s/%s--%s_sensor%s%s', saveRoot, date.start, date.end, sensorStr, netLayout);
+dirName.file = sprintf('%s--%s_sensor%s%s.mat', date.start, date.end, sensorStr, netLayout);
+dirName.status = sprintf('%s--%s_sensor%s%s_status.mat', date.start, date.end, sensorStr, netLayout);
 
 if ~exist(dirName.home,'dir'), mkdir(dirName.home); end
 for g = 1 : groupTotal
