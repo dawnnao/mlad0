@@ -194,7 +194,7 @@ sensor.status{s}(2,1) = {1};
 status = sensor.status{s};
 savePath = [GetFullPath(dirName.home) '/' dirName.status];
 if exist(savePath, 'file'), delete(savePath); end
-save(savePath, '-v7.3')
+save(savePath, 'status', '-v7.3')
 
 % ask go on or stop
 head = 'Continue to step2, label some data for building neural networks?';
@@ -407,7 +407,7 @@ end
 status(2,2) = {1};
 savePath = [GetFullPath(dirName.home) '/' dirName.status];
 if exist(savePath, 'file'), delete(savePath); end
-save(savePath, '-v7.3')
+save(savePath, 'status', '-v7.3')
 
 elapsedTime(2) = toc(t(2)); [hours, mins, secs] = sec2hms(elapsedTime(2));
 fprintf('\n\n\nSTEP2:\nSensor(s) training set making completes, using %02d:%02d:%05.2f .\n', ...
@@ -518,7 +518,7 @@ for g = 1 : groupTotal
         feature{g}.trainRatio = 50/100;
         feature{g}.trainSize = floor(size(feature{g}.image,2) * feature{g}.trainRatio);
         % hidden layer 1
-        hiddenSize(1) = 200;
+        hiddenSize(1) = 100;
         autoenc{1} = trainAutoencoder(feature{g}.image(:,1 : feature{g}.trainSize),...
             hiddenSize(1), ...
             'MaxEpochs',50, ...
@@ -528,7 +528,7 @@ for g = 1 : groupTotal
             'ScaleData', false);
         feat{1} = encode(autoenc{1},feature{g}.image(:,1 : feature{g}.trainSize));
         % hidden layer 2
-        hiddenSize(2) = 100;
+        hiddenSize(2) = 75;
         autoenc{2} = trainAutoencoder(feat{1},hiddenSize(2), ...
             'MaxEpochs',50, ...
             'L2WeightRegularization',0.002, ...
@@ -618,7 +618,7 @@ fprintf('\n\n\nSTEP3:\nDeep neural network(s) training completes, using %02dh%02
 status(2,3) = {1};
 savePath = [GetFullPath(dirName.home) '/' dirName.status];
 if exist(savePath, 'file'), delete(savePath); end
-save(savePath, '-v7.3')
+save(savePath, 'status', '-v7.3')
 
 % ask go on or stop
 head = 'Continue to step4 - anomaly detection?';
@@ -694,7 +694,7 @@ fprintf('\n\n\nSTEP4:\nAnomaly detection completes, using %02dh%02dm%05.2fs .\n'
 status(2,4) = {1};
 savePath = [GetFullPath(dirName.home) '/' dirName.status];
 if exist(savePath, 'file'), delete(savePath); end
-save(savePath, '-v7.3')
+save(savePath, 'status', '-v7.3')
 
 % ask go on or stop
 head = 'Continue to step5, anomaly statistics?';
@@ -747,22 +747,22 @@ date.serial.start = datenum(date.start, dirName.formatIn);  % day numbers from y
 date.serial.end   = datenum(date.end, dirName.formatIn);
 hourTotal = (date.serial.end-date.serial.start+1)*24;
 
-reportCover; % make report cover
+% reportCover; % make report cover
 
 % plot panorama
 dirName.plotPano = [dirName.home '/plot/panorama'];
 if ~exist(dirName.plotPano, 'dir'), mkdir(dirName.plotPano); end
-% for s = sensor.numVec
-%     panorama(sensor.date.serial{s}, sensor.label.neuralNet{s}, sprintf('        %02d', s), color(1:labelTotal));
-%     dirName.panorama{s} = [sprintf('%s--%s_sensor_%02d', date.start, date.end, s) '_anomalyDetectionPanorama.png'];
-%     saveas(gcf,[dirName.plotPano '/' dirName.panorama{s}]);
-%     fprintf('\nSenor-%02d anomaly detection panorama file location:\n%s\n', ...
-%         s, GetFullPath([dirName.plotPano '/' dirName.panorama{s}]))
-%     close
-%     
-%     % update sensor.status
-%     sensor.status{s}(2,5) = {1};
-% end
+for s = sensor.numVec
+    panorama(sensor.date.serial{s}, sensor.label.neuralNet{s}, sprintf('        %02d', s), color(1:labelTotal));
+    dirName.panorama{s} = [sprintf('%s--%s_sensor_%02d', date.start, date.end, s) '_anomalyDetectionPanorama.png'];
+    saveas(gcf,[dirName.plotPano '/' dirName.panorama{s}]);
+    fprintf('\nSenor-%02d anomaly detection panorama file location:\n%s\n', ...
+        s, GetFullPath([dirName.plotPano '/' dirName.panorama{s}]))
+    close
+    
+    % update sensor.status
+    sensor.status{s}(2,5) = {1};
+end
 
 n = 0;
 panopano = [];
@@ -779,7 +779,7 @@ end
 dirName.panopano = [sprintf('%s--%s_sensor_all%s', date.start, date.end, sensorStr) ...
                     '_anomalyDetectionPanorama.png'];
 imwrite(panopano, [dirName.plotPano '/' dirName.panopano]);
-reportPano; % make report chapter - Panorama
+% reportPano; % make report chapter - Panorama
 
 clear height width p n
 
@@ -801,7 +801,7 @@ for s = sensor.numVec
 
     close
 end
-reportStatsSensor;
+% reportStatsSensor;
 
 % plot anomaly space-time distribution per type
 dirName.plotSPT = [dirName.home '/plot/statsPerType'];
@@ -823,7 +823,7 @@ for l = 1 : labelTotal
         close
     end
 end
-reportStatsLabel;
+% reportStatsLabel;
 
 % plot sensor-type bar stats
 dirName.plotSum = [dirName.home '/plot/statsSumUp'];
@@ -858,7 +858,7 @@ saveas(gcf,[dirName.plotSum '/' dirName.statsSum]);
 fprintf('\nSum-up anomaly stats image file location:\n%s\n', ...
     GetFullPath([dirName.plotSum '/' dirName.statsSum]))
 close
-reportStatsTotal;
+% reportStatsTotal;
 
 % crop legend to panorama's folder
 img = imread([dirName.plotSum '/' dirName.statsSum]);
@@ -879,7 +879,7 @@ fprintf('\n\n\nSTEP5:\nAnomaly statistics completes, using %02dh%02dm%05.2fs .\n
 status(2,5) = {1};
 savePath = [GetFullPath(dirName.home) '/' dirName.status];
 if exist(savePath, 'file'), delete(savePath); end
-save(savePath, '-v7.3')
+save(savePath, 'status', '-v7.3')
 
 % ask go on or stop
 head = 'Continue to step6, automatically remove outliers?';
