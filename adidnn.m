@@ -96,7 +96,8 @@ groupTotal = length(sensorNum(:));
 sensor.numVec = [];
 for g = 1 : groupTotal, sensor.numVec = [sensor.numVec sensorNum{g}(:)']; end
 sensorTotal = length(sensor.numVec);
-color= {[129 199 132]/255;    % 1-normal     green
+color= {[132 198 134]/255;    % 1-normal     green
+%         [129 199 132]/255;    % 1-normal     green
         [244 67 54]/255;      % 2-outlier    red
         [121 85 72]/255;      % 3-minor      brown
         [255 112 67]/255;     % 4-missing    orange
@@ -252,7 +253,7 @@ date.serial.start = datenum(date.start, dirName.formatIn);  % day numbers from y
 date.serial.end   = datenum(date.end, dirName.formatIn);
 hourTotal = (date.serial.end-date.serial.start+1)*24;
 
-seed = 1;  %intialize
+seed = 2;  %intialize
 goNext = 0;
 while goNext == 0
     % randomization
@@ -747,22 +748,22 @@ date.serial.start = datenum(date.start, dirName.formatIn);  % day numbers from y
 date.serial.end   = datenum(date.end, dirName.formatIn);
 hourTotal = (date.serial.end-date.serial.start+1)*24;
 
-reportCover; % make report cover
+% reportCover; % make report cover!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 % plot panorama
 dirName.plotPano = [dirName.home '/plot/panorama'];
 if ~exist(dirName.plotPano, 'dir'), mkdir(dirName.plotPano); end
-% for s = sensor.numVec
-%     panorama(sensor.date.serial{s}, sensor.label.neuralNet{s}, sprintf('        %02d', s), color(1:labelTotal));
-%     dirName.panorama{s} = [sprintf('%s--%s_sensor_%02d', date.start, date.end, s) '_anomalyDetectionPanorama.png'];
-%     saveas(gcf,[dirName.plotPano '/' dirName.panorama{s}]);
-%     fprintf('\nSenor-%02d anomaly detection panorama file location:\n%s\n', ...
-%         s, GetFullPath([dirName.plotPano '/' dirName.panorama{s}]))
-%     close
-%     
-%     % update sensor.status
-%     sensor.status{s}(2,5) = {1};
-% end
+for s = sensor.numVec
+    panorama(sensor.date.serial{s}, sensor.label.neuralNet{s}, sprintf('        %02d', s), color(1:labelTotal));
+    dirName.panorama{s} = [sprintf('%s--%s_sensor_%02d', date.start, date.end, s) '_anomalyDetectionPanorama.png'];
+    saveas(gcf,[dirName.plotPano '/' dirName.panorama{s}]);
+    fprintf('\nSenor-%02d anomaly detection panorama file location:\n%s\n', ...
+        s, GetFullPath([dirName.plotPano '/' dirName.panorama{s}]))
+    close
+    
+    % update sensor.status
+    sensor.status{s}(2,5) = {1};
+end
 
 n = 0;
 panopano = [];
@@ -779,7 +780,7 @@ end
 dirName.panopano = [sprintf('%s--%s_sensor_all%s', date.start, date.end, sensorStr) ...
                     '_anomalyDetectionPanorama.png'];
 imwrite(panopano, [dirName.plotPano '/' dirName.panopano]);
-reportPano; % make report chapter - Panorama
+% reportPano; % make report chapter - Panorama!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 clear height width p n
 
@@ -801,7 +802,7 @@ for s = sensor.numVec
 
     close
 end
-reportStatsSensor;
+% reportStatsSensor;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 % plot anomaly space-time distribution per type
 dirName.plotSPT = [dirName.home '/plot/statsPerType'];
@@ -823,7 +824,7 @@ for l = 1 : labelTotal
         close
     end
 end
-reportStatsLabel;
+% reportStatsLabel;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 % plot sensor-type bar stats
 dirName.plotSum = [dirName.home '/plot/statsSumUp'];
@@ -858,7 +859,7 @@ saveas(gcf,[dirName.plotSum '/' dirName.statsSum]);
 fprintf('\nSum-up anomaly stats image file location:\n%s\n', ...
     GetFullPath([dirName.plotSum '/' dirName.statsSum]))
 close
-reportStatsTotal;
+% reportStatsTotal;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 % crop legend to panorama's folder
 img = imread([dirName.plotSum '/' dirName.statsSum]);

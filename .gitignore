@@ -13,6 +13,7 @@ temp
 *.mp4
 net-parallel-dnn
 net-parallel-ann
+*.icloud
 
 # Compiled source #
 ###################
