@@ -73,7 +73,7 @@ p = figure;
 for l = 1:length(legendColor)
     for n = 1:3
         area(plotx, plotyTri{n}(l,:), ...
-            'edgecolor', 'none', 'facecolor', color.label{l}, 'facealpha', 0.5); % , 'facealpha', 0.5
+            'edgecolor', 'none', 'facecolor', color.label{l}, 'facealpha', 0.9); % , 'facealpha', 0.5
         hold on
     end
 end

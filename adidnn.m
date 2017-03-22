@@ -96,8 +96,7 @@ groupTotal = length(sensorNum(:));
 sensor.numVec = [];
 for g = 1 : groupTotal, sensor.numVec = [sensor.numVec sensorNum{g}(:)']; end
 sensorTotal = length(sensor.numVec);
-color= {[132 198 134]/255;    % 1-normal     green
-%         [129 199 132]/255;    % 1-normal     green
+color= {[129 199 132]/255;    % 1-normal     green
         [244 67 54]/255;      % 2-outlier    red
         [121 85 72]/255;      % 3-minor      brown
         [255 112 67]/255;     % 4-missing    orange
