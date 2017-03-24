@@ -15,6 +15,7 @@ net-parallel-dnn
 net-parallel-ann
 visualizeFeatures*
 *.icloud
+plotForPaper*
 
 # Compiled source #
 ###################
