@@ -750,6 +750,18 @@ hourTotal = (date.serial.end-date.serial.start+1)*24;
 
 % reportCover; % make report cover!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+% sum results to check ratios of each anomaly
+sumResults = zeros(1,labelTotal+1);
+for s = sensor.numVec
+    for m = 1 : labelTotal
+        sumResults(m) = sumResults(m) + sum(cell2mat(sensor.label.neuralNet(s)) == m);
+    end
+end
+sumResults(end) = sum(sumResults);
+sumResultsRatioInAnomalies = (sumResults./(sumResults(end)-sumResults(1))).*100;
+sumResultsRatioInTotal = (sumResults./sumResults(end)).*100;
+
+
 % plot panorama
 dirName.plotPano = [dirName.home '/plot/panorama'];
 if ~exist(dirName.plotPano, 'dir'), mkdir(dirName.plotPano); end
