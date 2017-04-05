@@ -11,7 +11,7 @@ sensorTrainRatio = 50/100;
 step = [5];
 % labelName = {'1-normal','2-outlier','3-minor'};
 
-sensor = adidnn(pathRoot, saveRoot, sensorNum, dateStart, dateEnd, ...
+sensor = mvad(pathRoot, saveRoot, sensorNum, dateStart, dateEnd, ...
                 sensorTrainRatio, [], step, []);
 
 

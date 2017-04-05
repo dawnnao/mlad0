@@ -1,10 +1,11 @@
-function sensor = adidnn(readRoot, saveRoot, sensorNum, dateStart, dateEnd, sensorTrainRatio, sensorPSize, step, labelName)
+function sensor = mvad(readRoot, saveRoot, sensorNum, dateStart, dateEnd, sensorTrainRatio, sensorPSize, step, labelName)
 % DESCRIPTION:
-%   This is a smart pre-processing(spp) function for bridge's structural
-%   health monitoring data. The work flow is: read tidy data -> assist user
-%   label partial data to make a training set -> automatically train a
-%   neural network and classify all data -> automatically remove bad data ->
-%   automatically recover data using Group Compress Sensing.
+%   This is a machine vision and machine learning based pre-processing
+%   function for bridge's structural health monitoring data. The work flow is:
+%   read tidy data -> assist user label partial data to make a training set ->
+%   automatically train deep neural network(s) and classify all data ->
+%   automatically remove bad data (undone) -> automatically recover data using
+%   multiple data recovery techniques (undone).
 
 % OUTPUTS:
 %   sensor (structure):

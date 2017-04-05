@@ -19,6 +19,6 @@ sensorPSize = 10;
 step = [5];
 
 %%
-sensor = adidnn(readRoot, saveRoot, sensorNum, dateStart, dateEnd, ...
+sensor = mvad(readRoot, saveRoot, sensorNum, dateStart, dateEnd, ...
             sensorTrainRatio, sensorPSize, step, []);
 
