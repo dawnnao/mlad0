@@ -26,7 +26,7 @@ function edge = abbr(vec)
 %   Center of Structural Monitoring and Control
 % 
 % DATE CREATED:
-%   2016/12/19
+%   12/19/2016
 
 line = zeros(1, max(vec)+1);
 line(vec) = vec;

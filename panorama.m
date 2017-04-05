@@ -11,16 +11,13 @@ function p = panorama(xSerial, yLabel, yStr, legendColor)
 %   xSerial (double) - serial date array for plot xlabel
 %   yLabel (duble) - data classification array (1 for good, 2 for bad)
 
-% EDITION:
-%   0.1
-% 
 % AUTHOR:
 %   Zhiyi Tang
 %   tangzhi1@hit.edu.cn
 %   Center of Structural Monitoring and Control
 % 
 % DATE CREATED:
-%   2016/12/10
+%   12/10/2016
 
 %% pass variable(s)
 color.label = legendColor;

@@ -1,4 +1,14 @@
 function f = monthStatsPerLabel(stats, labelNum, labelName, color)
+% DESCRIPTION:
+%   This is a subfunction of mvad.m, to auto-draw bar plot
+
+% AUTHOR:
+%   Zhiyi Tang
+%   tangzhi1@hit.edu.cn
+%   Center of Structural Monitoring and Control
+% 
+% DATE CREATED:
+%   12/10/2016  
 
 f = figure;
 h = bar3(stats);

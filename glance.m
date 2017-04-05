@@ -1,16 +1,7 @@
 function [sensorData, dateVec, dateSerial] = glance(pathRead, sensorNum, dayStart, dayEnd, pathSave, prefix)
 % DESCRIPTION:
-%   This is a subfunction of pspp.m, to read user specified data, and
+%   This is a subfunction of mvad.m, to read user specified data, and
 %   display progress in command window.
-
-% OUTPUTS:
-%   sensorData (double) - Each column is an hour's raw data
-%   dateVec (double) - 
-%   dateSerial (double) - 
-% 
-% INPUTS:
-%   pathRoot () - 
-% 
 
 % AUTHOR:
 %   Zhiyi Tang
@@ -18,7 +9,7 @@ function [sensorData, dateVec, dateSerial] = glance(pathRead, sensorNum, dayStar
 %   Center of Structural Monitoring and Control
 % 
 % DATE CREATED:
-%   2016/12/19  
+%   12/19/2016  
 
 path.root = pathRead;
 hourTotal = (dayEnd-dayStart+1)*24;

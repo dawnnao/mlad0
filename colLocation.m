@@ -1,6 +1,6 @@
 function [date, h] = colLocation(x,dateStart)
 % DESCRIPTION:
-%   This is a subfunction for spp.m, to calculate xth hour's date. Hour
+%   This is a subfunction for mvad.m, to calculate xth hour's date. Hour
 %   counting starts at a user-specified date.
 
 % OUTPUTS:
@@ -16,17 +16,14 @@ function [date, h] = colLocation(x,dateStart)
 %   [date, h] = colLocation(25,'2016-01-01')
 %   date = 2016-01-02
 %   h = 0
-
-% EDITION:
-%   0.1
-% 
+ 
 % AUTHOR:
 %   Zhiyi Tang
 %   tangzhi1@hit.edu.cn
 %   Center of Structural Monitoring and Control
 % 
 % DATE CREATED:
-%   2016/12/10
+%   12/10/2016
 
 dateStart = datenum(dateStart,'yyyy-mm-dd'); % start at 2016-01-01 00:00
 x = x-1;

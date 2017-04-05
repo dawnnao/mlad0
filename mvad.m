@@ -1,7 +1,7 @@
 function sensor = mvad(readRoot, saveRoot, sensorNum, dateStart, dateEnd, sensorTrainRatio, sensorPSize, step, labelName)
 % DESCRIPTION:
-%   This is a machine vision and machine learning based pre-processing
-%   function for bridge's structural health monitoring data. The work flow is:
+%   This is a machine vision based anomaly detection (MVAD) pre-processing
+%   function for structural health monitoring data. The work flow is:
 %   read tidy data -> assist user label partial data to make a training set ->
 %   automatically train deep neural network(s) and classify all data ->
 %   automatically remove bad data (undone) -> automatically recover data using
@@ -9,45 +9,48 @@ function sensor = mvad(readRoot, saveRoot, sensorNum, dateStart, dateEnd, sensor
 
 % OUTPUTS:
 %   sensor (structure):
-%   sensor.num (double) - column number in the inputted tidy data
-%   sensor.trainRatio (cell) - ratio to make man-labeled data set
+%   sensor.num (cell) - column number of channel in the input data
+%   sensor.numVec (double) - convert sensor.num into array format (useless to user)
+%   sensor.trainRatio (cell) - (training set size)/(the whole data set size)
 %   sensor.pSize (double) - data points in a packet in wireless transmission
 %                           (if a packet loses in transmission, all points
 %                            within become outliers)
-%   sensor.data (cell) - sensor raw data
-%   sensor.date (structure) - date information per hour
-%   sensor.image (cell) - image vector of data per hour
+%   sensor.date (structure) - date information of each data piece
+%   sensor.label (structure) - label information of each data piece
+%   sensor.neuralNet (cell) - neural network(s) for each channel
+%   sensor.trainRecord (cell) - training record
+%   sensor.count (structure) - statistics of each category of data
+%   sensor.statsPerSensor - information to auto-draw bar plot
+%   sensor.statsPerLabel - information to auto-draw bar plot
+%   sensor.ratioOfCategory - ratio of each category to auto-draw table
 %   sensor.status (cell) - work flow status
-%   sensor.label (structure) - label of data to indicate good or bad
-%   sensor.trainSetSize (double) - size of training set
-%   sensor.neuralNet (cell) - neural network variable
-%   sensor.trainRecord (cell) - train record
-%   sensor.count (structure) - position of good data and bad data
 % 
 % INPUTS:
-%   pathRoot (char) - data folder¡®s absolute path
-%   sensorNum (double) - column nubmer of sensor in mat file of raw data. 
-%                        Multiple numbers in a vector are supported
+%   readRoot (char) - raw data folder (absolute path)
+%   saveRoot (char) - detection result folder (absolute path)
+%   sensorNum (double/cell) - column nubmer of channel-to-detect. Example:
+%                 if channel 1, 2, 3 share a network, sensorNum = [1,2,3];
+%                 if channel 1 individually use a network, and channel 2, 3
+%                 share a network, sensorNum = {[1], [2,3]}
 %   dateStart (char) - start date of data, input format: 'yyyy-mm-dd'
 %   dateEnd (char) - end date of data, input format: 'yyyy-mm-dd'
-%   sensorTrainRatio (double) - ratio to make man-labeled data set
+%   sensorTrainRatio (double) - (training set size)/(the whole data set size)
 %   sensorPSize (double) - data points in a packet in wireless transmission
 %                          (if a packet loses in transmission, all points
 %                           within become outliers)
-%   step - step that starts at, including: 1.dataGlance  2.traningSetMake
-%          3.dataClassify  4.outlierRemove  5.compressSensingRecover
-%          (same as sensor.status)
+%   step (double) - choose steps, including: '1-Glance' '2-Label' '3-Train'
+%                                            '4-Detect' '5-Inspect
 % 
 % DEFAULT VALUES:
 %   sensorTrainRatio = 5/100
 %   sensorPSize = 10
-%   step = 1
+%   step = 1 (then program will ask go on or stop)
 % 
 % DATA FORMAT:
-%   Each mat file contains an hour data for all sensors, and each sensor's
-%   signal is a column vector. For example, 10 sensors, all with a 1Hz
+%   Each mat file contains an hour data for all channels, and each channel's
+%   signal is a column vector. For example, 10 channels, all with a 1Hz
 %   sampling frequency, there would be a 3600*10 array, named 'data'.
-%   Folder frame should be like this:
+%   Folder structure should be like this:
 %   -- 2016
 %      |
 %       - 2016-01-01
@@ -65,14 +68,18 @@ function sensor = mvad(readRoot, saveRoot, sensorNum, dateStart, dateEnd, sensor
 %       .
 %       .
 %       - 2016-12-31
-%   Subfolder and mat file's name should strictly follow the format above.
+%   Subfolder and mat file's name should strictly follow the format above,
+%   otherwise data would cannot be read in.
 % 
 % CAUTION:
-%   spp.m uses subfunction: colLocation.m, panorama.m, GetFullPath.m and
-%   sec2hms.m. Insure they are there in the working directory.
+%   mvad.m uses multiple subfunctions, insure they are there in the working directory.
 
-% EDITION:
+% VERSION:
 %   0.4
+% 
+% WHAT'S NEW
+% 0.4: 04/05/2017
+% * Add
 % 
 % AUTHOR:
 %   Zhiyi Tang
@@ -80,7 +87,7 @@ function sensor = mvad(readRoot, saveRoot, sensorNum, dateStart, dateEnd, sensor
 %   Center of Structural Monitoring and Control
 % 
 % DATE CREATED:
-%   2016/12/09
+%   12/09/2016
 
 % set input defaults:
 if ~exist('sensorTrainRatio', 'var') || isempty(sensorTrainRatio), sensorTrainRatio = 5/100; end
@@ -750,18 +757,6 @@ hourTotal = (date.serial.end-date.serial.start+1)*24;
 
 % reportCover; % make report cover!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-% sum results to check ratios of each anomaly
-sumResults = zeros(1,labelTotal+1);
-for s = sensor.numVec
-    for m = 1 : labelTotal
-        sumResults(m) = sumResults(m) + sum(cell2mat(sensor.label.neuralNet(s)) == m);
-    end
-end
-sumResults(end) = sum(sumResults);
-sumResultsRatioInAnomalies = (sumResults./(sumResults(end)-sumResults(1))).*100;
-sumResultsRatioInTotal = (sumResults./sumResults(end)).*100;
-
-
 % plot panorama
 dirName.plotPano = [dirName.home '/plot/panorama'];
 if ~exist(dirName.plotPano, 'dir'), mkdir(dirName.plotPano); end
@@ -876,6 +871,17 @@ fprintf('\nSum-up anomaly stats image file location:\n%s\n', ...
 close
 
 % reportStatsTotal;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+% sum results to check ratios of each anomaly
+sensor.ratioOfCategory = zeros(3,labelTotal+1);
+for s = sensor.numVec
+    for m = 1 : labelTotal
+        sensor.ratioOfCategory(1,m) = sensor.ratioOfCategory(1,m) + length(cell2mat(sensor.count(m,s)));
+    end
+end
+sensor.ratioOfCategory(1,end) = sum(sensor.ratioOfCategory(1,:));
+sensor.ratioOfCategory(2,:) = (sensor.ratioOfCategory(1,:)./(sensor.ratioOfCategory(1,end)-sensor.ratioOfCategory(1,1))).*100;
+sensor.ratioOfCategory(3,:) = (sensor.ratioOfCategory(1,:)./sensor.ratioOfCategory(1,end)).*100;
 
 % crop legend to panorama's folder
 img = imread([dirName.plotSum '/' dirName.statsSum]);

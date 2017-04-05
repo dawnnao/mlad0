@@ -1,16 +1,6 @@
 function [label, labelCount, dateVec, dateSerial] = classifierMulti(pathRead, sensorNum, dayStart, dayEnd, pathSave, labelName, neuralNet)
 % DESCRIPTION:
-%   This is a subfunction of pspp.m, to read user specified data, and
-%   display progress in command window.
-
-% OUTPUTS:
-%   sensorData (double) - Each column is an hour's raw data
-%   dateVec (double) - 
-%   dateSerial (double) - 
-% 
-% INPUTS:
-%   pathRoot () - 
-% 
+%   This is a subfunction of mvad.m, to do step 4 anomaly detection.
 
 % AUTHOR:
 %   Zhiyi Tang
@@ -18,7 +8,7 @@ function [label, labelCount, dateVec, dateSerial] = classifierMulti(pathRead, se
 %   Center of Structural Monitoring and Control
 % 
 % DATE CREATED:
-%   2016/12/19  
+%   12/19/2016
 
 path.root = pathRead;
 hourTotal = (dayEnd-dayStart+1)*24;
