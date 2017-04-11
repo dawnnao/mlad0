@@ -1,1 +1,1 @@
-locsum = slocDir('/Users/tangzhiyi/Documents/MATLAB/mvad');
+locsum = slocDir('/Users/tangzhiyi/Documents/MATLAB/MVAD');

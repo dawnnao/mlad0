@@ -25,5 +25,5 @@ set(gcf,'Units','pixels','Position',[100, 100, 1000, 400]);
 %%
 folderName = 'plotForPaper';
 if ~exist(folderName, 'dir'), mkdir(folderName); end
-saveName = ['accel_' date '-' num2str(h,'%02d') '_ch' tidyName(abbr(channel)) '.png'];
+saveName = ['accel_' date '-' num2str(h,'%02d') '_ch' tidyName(abbr(channel)) '.eps'];
 saveas(gcf, [folderName '/' saveName]);
