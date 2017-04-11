@@ -10,7 +10,7 @@ sens = [16,18,19,21,24];
 
 n = 1;
 for m = sens
-    fileName = ['/Volumes/bigDisk/sutong-2012-temp/混凝土构件/北索塔下横梁/2012/' date sprintf('%s%02d_%02d0000.txt', str, m, h)];
+    fileName = ['H:/sutong-2012-temp/混凝土构件/北索塔下横梁/2012/' date sprintf('%s%02d_%02d0000.txt', str, m, h)];
     data{n} = csvread(fileName,0,0);
     n = n + 1;
 end
@@ -32,11 +32,11 @@ ylabel(strY);
 % end
 % legend(strLegend);
 
-set(gca, 'fontsize', 16);
 xlim([0 3600]);
-set(gca,'Units','normalized', 'Position',[0.08 0.12 0.9 0.82]);  % control axis's position in figure
+set(gca, 'fontsize', 14);
+set(gca,'Units','normalized', 'Position',[0.09 0.21 0.9 0.7]);  % control axis's position in figure
 % set(gca,'Units','normalized', 'OuterPosition',[0 0 1 1]);  % control axis's position in figure
-set(gcf,'Units','pixels','Position',[100, 100, 1000, 400]);
+set(gcf,'Units','pixels','Position',[100, 100, 1000, 300]);
 
 %%
 folderName = 'plotForPaper';

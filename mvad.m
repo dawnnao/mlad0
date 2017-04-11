@@ -585,18 +585,18 @@ for g = 1 : groupTotal
         temp.jFrame.dispose();
         % print to file
         set(temp.hFig, 'PaperPositionMode', 'auto');
-        saveas(temp.hFig, [dirName.net sprintf('/group-%d_netArchitecture.png', g)]);
+        saveas(temp.hFig, [dirName.net sprintf('/group-%d_netArchitecture.emf', g)]);
         % close figure
         close(temp.hFig)
         
         figure
         plotperform(sensor.trainRecord{s});
-        saveas(gcf,[dirName.net sprintf('/group-%d_netPerform.png', g)]);
+        saveas(gcf,[dirName.net sprintf('/group-%d_netPerform.emf', g)]);
         close
         
         figure
         plotconfusion(feature{g}.label.manual(:,feature{g}.trainSize+1 : end), y);
-        saveas(gcf,[dirName.net sprintf('/group-%d_netConfuse.png', g)]);
+        saveas(gcf,[dirName.net sprintf('/group-%d_netConfuse.emf', g)]);
         close
         clear h jpanel
         temp = rmfield(temp, {'jFrame', 'hFig'});
@@ -785,7 +785,7 @@ for s = sensor.numVec
     panopano = cat(1, p{s}, panopano);
 end
 dirName.panopano = [sprintf('%s--%s_sensor_all%s', date.start, date.end, sensorStr) ...
-                    '_anomalyDetectionPanorama.png'];
+                    '_anomalyDetectionPanorama.tif'];
 imwrite(panopano, [dirName.plotPano '/' dirName.panopano]);
 
 % reportPano; % make report chapter - Panorama!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -803,7 +803,7 @@ for s = sensor.numVec
         end
     end
     monthStatsPerSensor(sensor.statsPerSensor{s}, s, sensor.label.name, color);
-    dirName.statsPerSensor{s} = [sprintf('%s--%s_sensor_%02d', date.start, date.end, s) '_anomalyStats.png'];
+    dirName.statsPerSensor{s} = [sprintf('%s--%s_sensor_%02d', date.start, date.end, s) '_anomalyStats.emf'];
     saveas(gcf,[dirName.plotSPS '/' dirName.statsPerSensor{s}]);
     fprintf('\nSenor-%02d anomaly stats bar-plot file location:\n%s\n', ...
         s, GetFullPath([dirName.plotSPS '/' dirName.statsPerSensor{s}]))
@@ -825,7 +825,7 @@ for l = 1 : labelTotal
    end
    if sum(sum(sensor.statsPerLabel{l})) > 0
         monthStatsPerLabel(sensor.statsPerLabel{l}, l, sensor.label.name{l}, color);
-        dirName.statsPerLabel{l} = sprintf('%s--%s_sensor%s_anomalyStats_%s.png', ...
+        dirName.statsPerLabel{l} = sprintf('%s--%s_sensor%s_anomalyStats_%s.emf', ...
             date.start, date.end, sensorStr, sensor.label.name{l});
         saveas(gcf,[dirName.plotSPT '/' dirName.statsPerLabel{l}]);
         fprintf('\n%s anomaly stats bar-plot file location:\n%s\n', ...
@@ -863,7 +863,7 @@ for n = 1 : labelTotal
 end
 set(gca, 'fontsize', 12);
 
-dirName.statsSum = sprintf('%s--%s_sensor%s_anomalyStats.png', ...
+dirName.statsSum = sprintf('%s--%s_sensor%s_anomalyStats.emf', ...
     date.start, date.end, sensorStr);
 saveas(gcf,[dirName.plotSum '/' dirName.statsSum]);
 fprintf('\nSum-up anomaly stats image file location:\n%s\n', ...
@@ -883,16 +883,16 @@ sensor.ratioOfCategory(1,end) = sum(sensor.ratioOfCategory(1,:));
 sensor.ratioOfCategory(2,:) = (sensor.ratioOfCategory(1,:)./(sensor.ratioOfCategory(1,end)-sensor.ratioOfCategory(1,1))).*100;
 sensor.ratioOfCategory(3,:) = (sensor.ratioOfCategory(1,:)./sensor.ratioOfCategory(1,end)).*100;
 
-% crop legend to panorama's folder
-img = imread([dirName.plotSum '/' dirName.statsSum]);
-if ispc
-    imgLegend = imcrop(img, [646.5 42.5 172 300]);
-elseif ismac
-%     imgLegend = imcrop(img, [660.5 42.5 160 229]);
-    imgLegend = imcrop(img, [882.5 57.5 204 280]);
-end
-figure, imshow(imgLegend)
-saveas(gcf, [dirName.plotPano '/legend.png']); close
+% % crop legend to panorama's folder
+% img = imread([dirName.plotSum '/' dirName.statsSum]);
+% if ispc
+%     imgLegend = imcrop(img, [646.5 42.5 172 300]);
+% elseif ismac
+% %     imgLegend = imcrop(img, [660.5 42.5 160 229]);
+%     imgLegend = imcrop(img, [882.5 57.5 204 280]);
+% end
+% figure, imshow(imgLegend)
+% saveas(gcf, [dirName.plotPano '/legend.emf']); close
 
 elapsedTime(5) = toc(t(5)); [hours, mins, secs] = sec2hms(elapsedTime(5));
 fprintf('\n\n\nSTEP5:\nAnomaly statistics completes, using %02dh%02dm%05.2fs .\n', ...
@@ -984,8 +984,8 @@ while n <= util.hours
         xlim([0 size(sensor.data{s},1)]);
 
         % save fixed data plot
-        saveas(gcf,[dirName.outlierCleaned '/outlierCleaned_' num2str(n) '.png']);
-        temp.image = imread([dirName.outlierCleaned '/outlierCleaned_' num2str(n) '.png']);
+        saveas(gcf,[dirName.outlierCleaned '/outlierCleaned_' num2str(n) '.emf']);
+        temp.image = imread([dirName.outlierCleaned '/outlierCleaned_' num2str(n) '.emf']);
         temp.image = rgb2gray(temp.image);
         temp.image = im2double(temp.image(:));
         sensor.image{s}(:,n) = temp.image;  % update sensor.image
