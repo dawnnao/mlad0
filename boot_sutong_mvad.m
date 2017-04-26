@@ -1,8 +1,10 @@
 clear;clc;close all;
 
 
-readRoot = 'G:/sutong-2012-tidy';
-saveRoot = 'F:/adi';
+readRoot = 'H:/sutong-2012-tidy';
+saveRoot = 'F:/adi/case';
+
+% saveRoot = 'F:/adi/case';
 
 % readRoot = '/Volumes/bigDisk/sutong-2012-tidy';
 % saveRoot = '/Volumes/bigDisk';
@@ -14,9 +16,10 @@ saveRoot = 'F:/adi';
 sensorNum = [1:38];
 dateStart = '2012-01-01';
 dateEnd = '2012-12-31';
-sensorTrainRatio = 20/100;
+sensorTrainRatio = 1/100;
 sensorPSize = 10;
 step = [5];
+% labelName = {'1-normal','2-missing','3-minor','4-outlier','5-square','6-trend up','7-trend down','8-trend random'};
 
 %%
 sensor = mvad(readRoot, saveRoot, sensorNum, dateStart, dateEnd, ...

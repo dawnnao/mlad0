@@ -64,7 +64,8 @@ end
 % color.label{7} = [255 235 59]/255;   % 7-bias       yellow
 % color.label{8} = [168 168 168]/255;  % 8-cutoff     gray
 
-color.axis = [107 107 107]/255;
+% color.axis = [107 107 107]/255;
+color.axis = [0 0 0]/255;
 
 p = figure;
 for l = 1:length(legendColor)
@@ -107,6 +108,7 @@ for n = 1 : length(plotx)
         xLabel{n} = datestr(plotx(n), 'mm-dd ddd HH:MM');
     end
 end
+xLabel{1} = ' '; % !!! make the 1st invisible
 
 %% axis control
 stem(plotx, bigTick, 'linewidth', 1, 'marker', 'none', 'color', color.axis);
@@ -119,7 +121,8 @@ ax.XColor = color.axis;
 ax.YColor = color.axis;
 ax.YTick = [];
 ax.YLabel.String = yStr;
-ax.YLabel.FontSize = 8;
+ax.YLabel.FontSize = 9;
+set(gca, 'fontname', 'Times New Roman', 'fontweight', 'bold');
 
 %% size control
 fig = gcf;
@@ -129,7 +132,7 @@ fig.Position = [0 0.75 1 0.08];  % control figure's position
 % set(gcf,'color','w');
 fig.Color = 'w';
 ax.Units = 'normalized';
-ax.Position = [0.055 0.48 0.94 0.5];  % control ax's position in figure
+ax.Position = [0.01 0.48 0.98 0.5];  % control ax's position in figure
 
 end
 
