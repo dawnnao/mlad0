@@ -5,7 +5,7 @@ channel = [38:-1:1];
 
 [date, h] = colLocation(token,'2012-01-01')
 % fileName = ['/Volumes/ssd/sutong-2012-tidy/' date '/' date ' ' num2str(h,'%02d') '-VIB.mat'];
-fileName = ['H:/sutong-2012-tidy/' date '/' date ' ' num2str(h,'%02d') '-VIB.mat'];
+fileName = ['G:/sutong-2012-tidy/' date '/' date ' ' num2str(h,'%02d') '-VIB.mat'];
 load(fileName);
 
 t = 0.05:0.05:3600;
@@ -20,7 +20,6 @@ ylabel('Accel. (m/s^2)');
 xlim([0 3600]);
 ylim([-0.8 0.6]);
 set(gca,'ytick', [-0.8 -0.6 -0.4 -0.2 0 0.2 0.4 0.6]);
-set(gca,'fontname', 'Times New Roman','fontweight','bold');
 
 % set(gca, 'fontsize', 20);
 % set(gca,'Units','normalized', 'Position',[0.06 0.14 0.93 0.83]);  % control axis's position in figure
