@@ -7,7 +7,7 @@ channel = [9:2:19];
 date = '2012-01-01';
 h = 7;
 % fileName = ['/Volumes/ssd/sutong-2012-tidy/' date '/' date ' ' num2str(h,'%02d') '-VIB.mat'];
-fileName = ['G:/sutong-2012-tidy/' date '/' date ' ' num2str(h,'%02d') '-VIB.mat'];
+fileName = ['H:/sutong-2012-tidy/' date '/' date ' ' num2str(h,'%02d') '-VIB.mat'];
 load(fileName);
 
 t = 0.05:0.05:3600;
@@ -20,6 +20,8 @@ plot(t,data(:,channel));
 xlabel('Time(sec)');
 ylabel('Accel. (m/s^2)');
 xlim([0 3600]);
+set(gca,'fontname', 'Times New Roman','fontweight','bold');
+
 % ylim([-0.8 0.7]);
 % set(gca,'ytick', [-0.8:0.2:0.6]);
 

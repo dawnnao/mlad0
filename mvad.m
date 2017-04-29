@@ -94,7 +94,8 @@ if ~exist('sensorTrainRatio', 'var') || isempty(sensorTrainRatio), sensorTrainRa
 if ~exist('sensorPSize', 'var') || isempty(sensorPSize), sensorPSize = 10; end
 if ~exist('step', 'var'), step = []; end
 if ~exist('labelName', 'var') || isempty(labelName)
-    labelName = {'1-normal','2-outlier','3-minor','4-missing','5-trend','6-drift','7-bias','8-cutoff','9-square'};
+%     labelName = {'1-normal','2-outlier','3-minor','4-missing','5-trend','6-drift','7-bias','8-cutoff','9-square'};
+    labelName = {'1-normal','2-missing','3-minor','4-outlier','5-square','6-monotonous trend','7-random trend'};
 end
 
 %% common variables
@@ -104,20 +105,21 @@ groupTotal = length(sensorNum(:));
 sensor.numVec = [];
 for g = 1 : groupTotal, sensor.numVec = [sensor.numVec sensorNum{g}(:)']; end
 sensorTotal = length(sensor.numVec);
-color= {[129 199 132]/255;    % 1-normal     green
-        [244 67 54]/255;      % 2-outlier    red
-        [121 85 72]/255;      % 3-minor      brown
-        [255 112 67]/255;     % 4-missing    orange
-        [33 150 243]/255;     % 5-trend      blue
-        [171 71 188]/255;     % 6-drift      purple
-        [255 235 59]/255;     % 7-bias       yellow
-        [168 168 168]/255;    % 8-cutoff     gray
-        [50 50 50]/255;       % 9-square     black
-        [0 121 107]/255;      % for custom   dark green
-        [24 255 255]/255;     % for custom   high-light blue
-        [118 255 3]/255;      % for custom   high-light green
-        [255 255 0]/255;      % for custom   high-light yellow
-        [50 50 50]/255};      % for custom   dark green
+color= {[129 199 132]/255;    % 1-normal            green
+        [244 67 54]/255;      % 2-missing           red
+        [121 85 72]/255;      % 3-minor             brown
+        [255 235 59]/255;     % 4-outlier           yellow
+        [50 50 50]/255;       % 5-square            black  
+        [33 150 243]/255;     % 6-monotonous trend  blue
+        [171 71 188]/255;     % 7-random trend      purple
+
+        [255 112 67]/255;     % for custom          orange        
+        [168 168 168]/255;    % for custom          gray
+        [0 121 107]/255;      % for custom          dark green
+        [24 255 255]/255;     % for custom          high-light blue
+        [118 255 3]/255;      % for custom          high-light green
+        [255 255 0]/255;      % for custom          high-light yellow
+        [50 50 50]/255};      % for custom          dark green
 
 % pass parameters to variables inside
 sensor.num = sensorNum;
@@ -260,7 +262,7 @@ date.serial.start = datenum(date.start, dirName.formatIn);  % day numbers from y
 date.serial.end   = datenum(date.end, dirName.formatIn);
 hourTotal = (date.serial.end-date.serial.start+1)*24;
 
-seed = 2;  %intialize
+seed = 3;  %intialize
 goNext = 0;
 while goNext == 0
     % randomization
@@ -513,7 +515,7 @@ for g = 1 : groupTotal
     end
 end
 
-seed = 1;
+seed = 9;
 rng(seed,'twister');
 fprintf('\nTraining...\n')
 for g = 1 : groupTotal
@@ -523,13 +525,13 @@ for g = 1 : groupTotal
     feature{g}.label.manual = feature{g}.label.manual(:, randp{g});
     for s = sensor.num{g}(1)
         % train deep neural network
-        feature{g}.trainRatio = 50/100;
+        feature{g}.trainRatio = 80/100;
         feature{g}.trainSize = floor(size(feature{g}.image,2) * feature{g}.trainRatio);
         % hidden layer 1
         hiddenSize(1) = 100;
         autoenc{1} = trainAutoencoder(feature{g}.image(:,1 : feature{g}.trainSize),...
             hiddenSize(1), ...
-            'MaxEpochs',50, ...
+            'MaxEpochs',100, ...
             'L2WeightRegularization',0.004, ...
             'SparsityRegularization',4, ...
             'SparsityProportion',0.15, ...
@@ -538,7 +540,7 @@ for g = 1 : groupTotal
         % hidden layer 2
         hiddenSize(2) = 75;
         autoenc{2} = trainAutoencoder(feat{1},hiddenSize(2), ...
-            'MaxEpochs',50, ...
+            'MaxEpochs',500, ...
             'L2WeightRegularization',0.002, ...
             'SparsityRegularization',4, ...
             'SparsityProportion',0.1, ...
@@ -547,7 +549,7 @@ for g = 1 : groupTotal
         % hidden layer 3
         hiddenSize(3) = 50;
         autoenc{3} = trainAutoencoder(feat{2},hiddenSize(3), ...
-            'MaxEpochs',100, ...
+            'MaxEpochs',500, ...
             'L2WeightRegularization',0.002, ...
             'SparsityRegularization',4, ...
             'SparsityProportion',0.1, ...
@@ -555,7 +557,7 @@ for g = 1 : groupTotal
         feat{3} = encode(autoenc{3},feat{2});
         % softmax classifier
         softnet = trainSoftmaxLayer(feat{3}, feature{g}.label.manual(:,1 : feature{g}.trainSize),...
-            'MaxEpochs',400);
+            'MaxEpochs',500);
         % stack
         sensor.neuralNet{s} = stack(autoenc{1},autoenc{2},autoenc{3},softnet);
 %         view(sensor.neuralNet{s})
@@ -572,8 +574,10 @@ for g = 1 : groupTotal
         [sensor.neuralNet{s},sensor.trainRecord{s}] = train(sensor.neuralNet{s}, ...
             feature{g}.image(:,1 : feature{g}.trainSize), feature{g}.label.manual(:,1 : feature{g}.trainSize));
         nntraintool close
-        y = sensor.neuralNet{s}(feature{g}.image(:,feature{g}.trainSize+1 : end));
         
+        
+        yTrain = sensor.neuralNet{s}(feature{g}.image(:,1 : feature{g}.trainSize));
+        yVali = sensor.neuralNet{s}(feature{g}.image(:,feature{g}.trainSize+1 : end));
         temp.jFrame = view(sensor.neuralNet{s});
         % create it in a MATLAB figure
         temp.hFig = figure('Menubar','none', 'Position',[100 100 960 166]);
@@ -591,12 +595,45 @@ for g = 1 : groupTotal
         
         figure
         plotperform(sensor.trainRecord{s});
+        box on
+        set(gca, 'fontsize',11, 'fontname', 'Times New Roman', 'fontweight', 'bold');
         saveas(gcf,[dirName.net sprintf('/group-%d_netPerform.emf', g)]);
         close
         
         figure
-        plotconfusion(feature{g}.label.manual(:,feature{g}.trainSize+1 : end), y);
-        saveas(gcf,[dirName.net sprintf('/group-%d_netConfuse.emf', g)]);
+        plotconfusion(feature{g}.label.manual(:,1 : feature{g}.trainSize), yTrain);
+        xlabel('Predicted');
+        ylabel('Actual');
+        title([]);
+        set(gca,'fontname', 'Times New Roman', 'fontweight', 'bold', 'fontsize', 12);
+        % minimize white space
+        ax = gca;
+        outerpos = ax.OuterPosition;
+        ti = ax.TightInset; 
+        left = outerpos(1) + ti(1);
+        bottom = outerpos(2) + ti(2) + 0.03;
+        ax_width = outerpos(3) - ti(1) - ti(3);
+        ax_height = outerpos(4) - ti(2) - ti(4) - 0.03;
+        ax.Position = [left bottom ax_width ax_height];
+        saveas(gcf,[dirName.net sprintf('/group-%d_netConfuseTrain.emf', g)]);
+        close
+        
+        figure
+        plotconfusion(feature{g}.label.manual(:,feature{g}.trainSize+1 : end), yVali);
+        xlabel('Predicted');
+        ylabel('Actual');
+        title([]);
+        set(gca,'fontname', 'Times New Roman', 'fontweight', 'bold', 'fontsize', 12);
+        % minimize white space
+        ax = gca;
+        outerpos = ax.OuterPosition;
+        ti = ax.TightInset; 
+        left = outerpos(1) + ti(1);
+        bottom = outerpos(2) + ti(2) + 0.03;
+        ax_width = outerpos(3) - ti(1) - ti(3);
+        ax_height = outerpos(4) - ti(2) - ti(4) - 0.03;
+        ax.Position = [left bottom ax_width ax_height];
+        saveas(gcf,[dirName.net sprintf('/group-%d_netConfuseVali.emf', g)]);
         close
         clear h jpanel
         temp = rmfield(temp, {'jFrame', 'hFig'});
@@ -757,59 +794,59 @@ hourTotal = (date.serial.end-date.serial.start+1)*24;
 
 % reportCover; % make report cover!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-% plot panorama
-dirName.plotPano = [dirName.home '/plot/panorama'];
-if ~exist(dirName.plotPano, 'dir'), mkdir(dirName.plotPano); end
-for s = sensor.numVec
-    panorama(sensor.date.serial{s}, sensor.label.neuralNet{s}, sprintf('        %02d', s), color(1:labelTotal));
-    dirName.panorama{s} = [sprintf('%s--%s_sensor_%02d', date.start, date.end, s) '_anomalyDetectionPanorama.png'];
-    saveas(gcf,[dirName.plotPano '/' dirName.panorama{s}]);
-    fprintf('\nSenor-%02d anomaly detection panorama file location:\n%s\n', ...
-        s, GetFullPath([dirName.plotPano '/' dirName.panorama{s}]))
-    close
-    
-    % update sensor.status
-    sensor.status{s}(2,5) = {1};
-end
+% % plot panorama
+% dirName.plotPano = [dirName.home '/plot/panorama'];
+% if ~exist(dirName.plotPano, 'dir'), mkdir(dirName.plotPano); end
+% for s = sensor.numVec
+%     panorama(sensor.date.serial{s}, sensor.label.neuralNet{s}, sprintf('        %02d', s), color(1:labelTotal));
+%     dirName.panorama{s} = [sprintf('%s--%s_sensor_%02d', date.start, date.end, s) '_anomalyDetectionPanorama.png'];
+%     saveas(gcf,[dirName.plotPano '/' dirName.panorama{s}]);
+%     fprintf('\nSenor-%02d anomaly detection panorama file location:\n%s\n', ...
+%         s, GetFullPath([dirName.plotPano '/' dirName.panorama{s}]))
+%     close
+%     
+%     % update sensor.status
+%     sensor.status{s}(2,5) = {1};
+% end
+% 
+% n = 0;
+% panopano = [];
+% for s = sensor.numVec
+%     n = n + 1;
+%     p{s} = imread(GetFullPath([dirName.plotPano '/' dirName.panorama{s}]));
+%     if n > 1
+%         height = size(p{s},1);
+%         width = size(p{s},2);
+%         p{s} = p{s}(1:ceil(height*0.22), :, :);
+%     end
+%     panopano = cat(1, p{s}, panopano);
+% end
+% dirName.panopano = [sprintf('%s--%s_sensor_all%s', date.start, date.end, sensorStr) ...
+%                     '_anomalyDetectionPanorama.tif'];
+% imwrite(panopano, [dirName.plotPano '/' dirName.panopano]);
+% 
+% % reportPano; % make report chapter - Panorama!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+% 
+% clear height width p n
 
-n = 0;
-panopano = [];
-for s = sensor.numVec
-    n = n + 1;
-    p{s} = imread(GetFullPath([dirName.plotPano '/' dirName.panorama{s}]));
-    if n > 1
-        height = size(p{s},1);
-        width = size(p{s},2);
-        p{s} = p{s}(1:ceil(height*0.22), :, :);
-    end
-    panopano = cat(1, p{s}, panopano);
-end
-dirName.panopano = [sprintf('%s--%s_sensor_all%s', date.start, date.end, sensorStr) ...
-                    '_anomalyDetectionPanorama.tif'];
-imwrite(panopano, [dirName.plotPano '/' dirName.panopano]);
-
-% reportPano; % make report chapter - Panorama!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-clear height width p n
-
-% plot monthly stats per sensor
-dirName.plotSPS = [dirName.home '/plot/statsPerSensor'];
-if ~exist(dirName.plotSPS, 'dir'), mkdir(dirName.plotSPS); end
-for s = sensor.numVec
-    for n = 1 : 12
-        for l = 1 : labelTotal
-            aim = find(sensor.date.vec{s}(:,2) == n);
-            sensor.statsPerSensor{s}(n, l) = length(find(sensor.label.neuralNet{s}(aim) == l));
-        end
-    end
-    monthStatsPerSensor(sensor.statsPerSensor{s}, s, sensor.label.name, color);
-    dirName.statsPerSensor{s} = [sprintf('%s--%s_sensor_%02d', date.start, date.end, s) '_anomalyStats.emf'];
-    saveas(gcf,[dirName.plotSPS '/' dirName.statsPerSensor{s}]);
-    fprintf('\nSenor-%02d anomaly stats bar-plot file location:\n%s\n', ...
-        s, GetFullPath([dirName.plotSPS '/' dirName.statsPerSensor{s}]))
-
-    close
-end
+% % plot monthly stats per sensor
+% dirName.plotSPS = [dirName.home '/plot/statsPerSensor'];
+% if ~exist(dirName.plotSPS, 'dir'), mkdir(dirName.plotSPS); end
+% for s = sensor.numVec
+%     for n = 1 : 12
+%         for l = 1 : labelTotal
+%             aim = find(sensor.date.vec{s}(:,2) == n);
+%             sensor.statsPerSensor{s}(n, l) = length(find(sensor.label.neuralNet{s}(aim) == l));
+%         end
+%     end
+%     monthStatsPerSensorForPaper(sensor.statsPerSensor{s}, s, sensor.label.name, color);
+%     dirName.statsPerSensor{s} = [sprintf('%s--%s_sensor_%02d', date.start, date.end, s) '_anomalyStats.emf'];
+%     saveas(gcf,[dirName.plotSPS '/' dirName.statsPerSensor{s}]);
+%     fprintf('\nSenor-%02d anomaly stats bar-plot file location:\n%s\n', ...
+%         s, GetFullPath([dirName.plotSPS '/' dirName.statsPerSensor{s}]))
+% 
+%     close
+% end
 
 % reportStatsSensor;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -824,7 +861,7 @@ for l = 1 : labelTotal
        end
    end
    if sum(sum(sensor.statsPerLabel{l})) > 0
-        monthStatsPerLabel(sensor.statsPerLabel{l}, l, sensor.label.name{l}, color);
+        monthStatsPerLabelForPaper(sensor.statsPerLabel{l}, l, sensor.label.name{l}, color);
         dirName.statsPerLabel{l} = sprintf('%s--%s_sensor%s_anomalyStats_%s.emf', ...
             date.start, date.end, sensorStr, sensor.label.name{l});
         saveas(gcf,[dirName.plotSPT '/' dirName.statsPerLabel{l}]);
@@ -836,39 +873,57 @@ end
 
 % reportStatsLabel;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-% plot sensor-type bar stats
-dirName.plotSum = [dirName.home '/plot/statsSumUp'];
-if ~exist(dirName.plotSum, 'dir'), mkdir(dirName.plotSum); end
-for s = sensor.numVec
-   for l = 1 : labelTotal
-       statsSum(s, l) = length(find(sensor.label.neuralNet{s} == l));
-   end
-end
-
-if ~isempty(statsSum(1,1)) && size(statsSum, 1) == 1
-    statsSum(2,1:labelTotal) = 0;
-end
-
-figure
-h = bar(statsSum, 'stacked');
-xlabel('Sensor');
-ylabel('Count (hours)');
-legend(sensor.label.name);
-lh=findall(gcf,'tag','legend');
-set(lh,'location','northeastoutside');
-title(sprintf('%s--%s', date.start, date.end));
-grid on
-for n = 1 : labelTotal
-    set(h(n),'FaceColor', color{n});
-end
-set(gca, 'fontsize', 12);
-
-dirName.statsSum = sprintf('%s--%s_sensor%s_anomalyStats.emf', ...
-    date.start, date.end, sensorStr);
-saveas(gcf,[dirName.plotSum '/' dirName.statsSum]);
-fprintf('\nSum-up anomaly stats image file location:\n%s\n', ...
-    GetFullPath([dirName.plotSum '/' dirName.statsSum]))
-close
+% % plot sensor-type bar stats
+% dirName.plotSum = [dirName.home '/plot/statsSumUp'];
+% if ~exist(dirName.plotSum, 'dir'), mkdir(dirName.plotSum); end
+% for s = sensor.numVec
+%    for l = 1 : labelTotal
+%        statsSum(s, l) = length(find(sensor.label.neuralNet{s} == l));
+%    end
+% end
+% 
+% if ~isempty(statsSum(1,1)) && size(statsSum, 1) == 1
+%     statsSum(2,1:labelTotal) = 0;
+% end
+% 
+% figure
+% h = bar(statsSum, 'stacked');
+% xlabel('Sensor');
+% ylabel('Count (hours)');
+% legend(sensor.label.name);
+% lh=findall(gcf,'tag','legend');
+% set(lh,'location','northeastoutside');
+% title(sprintf('%s -- %s', date.start, date.end));
+% grid on
+% for n = 1 : labelTotal
+%     set(h(n),'FaceColor', color{n});
+% end
+% set(gca, 'fontsize', 13, 'fontname', 'Times New Roman', 'fontweight', 'bold');
+% set(gcf,'Units','pixels','Position',[100, 100, 1000, 500]);  % control figure's position
+% xlim([0 39]);
+% ylim([3000 9000]);
+% set(gca,'xtick',[1,5:5:35, 38]);
+% 
+% % minimize white space
+% ax = gca;
+% outerpos = ax.OuterPosition;
+% ti = ax.TightInset; 
+% left = outerpos(1) + ti(1);
+% bottom = outerpos(2) + ti(2);
+% ax_width = outerpos(3) - ti(1) - ti(3) - 0.01;
+% ax_height = outerpos(4) - ti(2) - ti(4);
+% ax.Position = [left bottom ax_width ax_height];
+% 
+% dirName.statsSum = sprintf('%s--%s_sensor%s_anomalyStats.emf', ...
+%     date.start, date.end, sensorStr);
+% 
+% saveas(gcf,[dirName.plotSum '/' dirName.statsSum]);
+% dirName.statsSum = sprintf('%s--%s_sensor%s_anomalyStats.png', ...
+%     date.start, date.end, sensorStr);
+% saveas(gcf,[dirName.plotSum '/' dirName.statsSum]);
+% fprintf('\nSum-up anomaly stats image file location:\n%s\n', ...
+%     GetFullPath([dirName.plotSum '/' dirName.statsSum]))
+% close
 
 % reportStatsTotal;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -886,7 +941,8 @@ sensor.ratioOfCategory(3,:) = (sensor.ratioOfCategory(1,:)./sensor.ratioOfCatego
 % % crop legend to panorama's folder
 % img = imread([dirName.plotSum '/' dirName.statsSum]);
 % if ispc
-%     imgLegend = imcrop(img, [646.5 42.5 172 300]);
+% %     imgLegend = imcrop(img, [646.5 42.5 172 300]);
+%     imgLegend = imcrop(img, [596.5 36.5 272 232]);
 % elseif ismac
 % %     imgLegend = imcrop(img, [660.5 42.5 160 229]);
 %     imgLegend = imcrop(img, [882.5 57.5 204 280]);
@@ -910,7 +966,7 @@ tail = 'Continue to automatically remove outliers...';
 savePath = [GetFullPath(dirName.home) '/' dirName.file];
 fprintf('\nSaving results...\nLocation: %s\n', savePath)
 if exist(savePath, 'file'), delete(savePath); end
-% save(savePath, '-v7.3')
+save(savePath, '-v7.3')
 if isempty(step)
     rightInput = 0;
     while rightInput == 0

@@ -33,6 +33,7 @@ ylabel(strY);
 % legend(strLegend);
 
 xlim([0 3600]);
+set(gca,'fontname', 'Times New Roman','fontweight','bold');
 set(gca, 'fontsize', 14);
 set(gca,'Units','normalized', 'Position',[0.09 0.21 0.9 0.7]);  % control axis's position in figure
 % set(gca,'Units','normalized', 'OuterPosition',[0 0 1 1]);  % control axis's position in figure
@@ -44,5 +45,5 @@ if ~exist(folderName, 'dir'), mkdir(folderName); end
 
 date = strrep(date, '/', '-');
 
-saveName = ['temp_2012-' date num2str(h,'%02d') '_sens_' str tidyName(abbr(sens)) '.png'];
+saveName = ['temp_2012-' date num2str(h,'%02d') '_sens_' str tidyName(abbr(sens)) '.emf'];
 saveas(gcf, [folderName '/' saveName]);

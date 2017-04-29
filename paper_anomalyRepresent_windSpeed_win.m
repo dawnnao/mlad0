@@ -21,6 +21,7 @@ ylabel('Wind Speed (m/s)');
 set(gca, 'fontsize', 16);
 %     xlim([0 size(data,1)]);
 xlim([0 600]);
+set(gca,'fontname', 'Times New Roman','fontweight','bold');
 set(gca, 'fontsize', 14);
 set(gca,'Units','normalized', 'Position',[0.09 0.21 0.9 0.7]);  % control axis's position in figure
 % set(gca,'Units','normalized', 'OuterPosition',[0 0 1 1]);  % control axis's position in figure
@@ -32,5 +33,5 @@ if ~exist(folderName, 'dir'), mkdir(folderName); end
 
 date = strrep(date, '/', '-');
 
-saveName = ['windSpeed_2012-' date num2str(h,'%02d') '_sens_' s '.png'];
+saveName = ['windSpeed_2012-' date num2str(h,'%02d') '_sens_' s '.emf'];
 saveas(gcf, [folderName '/' saveName]);

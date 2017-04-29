@@ -26,6 +26,7 @@ ylabel('GPS data (m)');
 % title(num2str(h));
 xlim([0 size(data,1)]);
 
+set(gca,'fontname', 'Times New Roman','fontweight','bold');
 set(gca, 'fontsize', 14);
 set(gca,'Units','normalized', 'Position',[0.09 0.21 0.9 0.7]);  % control axis's position in figure
 % set(gca,'Units','normalized', 'OuterPosition',[0 0 1 1]);  % control axis's position in figure
