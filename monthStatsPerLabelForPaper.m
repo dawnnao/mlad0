@@ -12,14 +12,20 @@ function f = monthStatsPerLabel(stats, labelNum, labelName, color)
 
 f = figure;
 h = bar3(stats);
-set(gca, 'fontsize', 18, 'fontname', 'Times New Roman', 'fontweight', 'bold');
-xlabel('Sensor');
-ylabel('Month');
+set(gca, 'fontsize', 24, 'fontname', 'Times New Roman', 'fontweight', 'bold');
+axisX = xlabel('Sensor');
+axisY = ylabel('Month');
 ylim([0,13]);
 set(gca,'ytick', [2:2:12]);
 zlabel('Count (hours)');
 hTitle = title(labelName);
 set(hTitle,'Position',[27 -15 16]);
+
+set(axisX,'Rotation', 21);
+% set(axisX,'Position',[20 12 -98.5]);
+set(axisY,'Rotation', -33);
+% set(axisY,'Position',[-0.69 5 -258.142]);
+
 
 %%
 

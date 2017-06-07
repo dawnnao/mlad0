@@ -1,4 +1,4 @@
-function sensor = mvad(readRoot, saveRoot, sensorNum, dateStart, dateEnd, sensorTrainRatio, sensorPSize, step, labelName)
+ function sensor = mvad(readRoot, saveRoot, sensorNum, dateStart, dateEnd, sensorTrainRatio, sensorPSize, step, labelName)
 % DESCRIPTION:
 %   This is a machine vision based anomaly detection (MVAD) pre-processing
 %   function for structural health monitoring data. The work flow is:
@@ -95,7 +95,7 @@ if ~exist('sensorPSize', 'var') || isempty(sensorPSize), sensorPSize = 10; end
 if ~exist('step', 'var'), step = []; end
 if ~exist('labelName', 'var') || isempty(labelName)
 %     labelName = {'1-normal','2-outlier','3-minor','4-missing','5-trend','6-drift','7-bias','8-cutoff','9-square'};
-    labelName = {'1-normal','2-missing','3-minor','4-outlier','5-square','6-monotonous trend','7-random trend'};
+    labelName = {'1-normal','2-missing','3-minor','4-outlier','5-square','6-trend','7-drift'};
 end
 
 %% common variables
@@ -110,8 +110,8 @@ color= {[129 199 132]/255;    % 1-normal            green
         [121 85 72]/255;      % 3-minor             brown
         [255 235 59]/255;     % 4-outlier           yellow
         [50 50 50]/255;       % 5-square            black  
-        [33 150 243]/255;     % 6-monotonous trend  blue
-        [171 71 188]/255;     % 7-random trend      purple
+        [33 150 243]/255;     % 6-trend             blue
+        [171 71 188]/255;     % 7-drift             purple
 
         [255 112 67]/255;     % for custom          orange        
         [168 168 168]/255;    % for custom          gray
@@ -798,7 +798,12 @@ hourTotal = (date.serial.end-date.serial.start+1)*24;
 % dirName.plotPano = [dirName.home '/plot/panorama'];
 % if ~exist(dirName.plotPano, 'dir'), mkdir(dirName.plotPano); end
 % for s = sensor.numVec
-%     panorama(sensor.date.serial{s}, sensor.label.neuralNet{s}, sprintf('        %02d', s), color(1:labelTotal));
+%     if mod(s,2) == 1
+%         yStrTemp = '';
+%     else
+%         yStrTemp = sprintf('      %02d', s);
+%     end
+%     panorama(sensor.date.serial{s}, sensor.label.neuralNet{s}, yStrTemp, color(1:labelTotal));
 %     dirName.panorama{s} = [sprintf('%s--%s_sensor_%02d', date.start, date.end, s) '_anomalyDetectionPanorama.png'];
 %     saveas(gcf,[dirName.plotPano '/' dirName.panorama{s}]);
 %     fprintf('\nSenor-%02d anomaly detection panorama file location:\n%s\n', ...
@@ -850,7 +855,7 @@ hourTotal = (date.serial.end-date.serial.start+1)*24;
 
 % reportStatsSensor;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-% plot anomaly space-time distribution per type
+% plot anomaly space-time distribution per class
 dirName.plotSPT = [dirName.home '/plot/statsPerType'];
 if ~exist(dirName.plotSPT, 'dir'), mkdir(dirName.plotSPT); end
 for l = 1 : labelTotal
@@ -924,19 +929,19 @@ end
 % fprintf('\nSum-up anomaly stats image file location:\n%s\n', ...
 %     GetFullPath([dirName.plotSum '/' dirName.statsSum]))
 % close
-
-% reportStatsTotal;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-% sum results to check ratios of each anomaly
-sensor.ratioOfCategory = zeros(3,labelTotal+1);
-for s = sensor.numVec
-    for m = 1 : labelTotal
-        sensor.ratioOfCategory(1,m) = sensor.ratioOfCategory(1,m) + length(cell2mat(sensor.count(m,s)));
-    end
-end
-sensor.ratioOfCategory(1,end) = sum(sensor.ratioOfCategory(1,:));
-sensor.ratioOfCategory(2,:) = (sensor.ratioOfCategory(1,:)./(sensor.ratioOfCategory(1,end)-sensor.ratioOfCategory(1,1))).*100;
-sensor.ratioOfCategory(3,:) = (sensor.ratioOfCategory(1,:)./sensor.ratioOfCategory(1,end)).*100;
+% 
+% % reportStatsTotal;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+% 
+% % sum results to check ratios of each anomaly
+% sensor.ratioOfCategory = zeros(3,labelTotal+1);
+% for s = sensor.numVec
+%     for m = 1 : labelTotal
+%         sensor.ratioOfCategory(1,m) = sensor.ratioOfCategory(1,m) + length(cell2mat(sensor.count(m,s)));
+%     end
+% end
+% sensor.ratioOfCategory(1,end) = sum(sensor.ratioOfCategory(1,:));
+% sensor.ratioOfCategory(2,:) = (sensor.ratioOfCategory(1,:)./(sensor.ratioOfCategory(1,end)-sensor.ratioOfCategory(1,1))).*100;
+% sensor.ratioOfCategory(3,:) = (sensor.ratioOfCategory(1,:)./sensor.ratioOfCategory(1,end)).*100;
 
 % % crop legend to panorama's folder
 % img = imread([dirName.plotSum '/' dirName.statsSum]);

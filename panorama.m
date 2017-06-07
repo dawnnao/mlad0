@@ -83,29 +83,31 @@ ax.XTick = plotx;
 xLabel = cell(size(plotx));
 bigTick = zeros(size(plotx));
 for n = 1 : length(plotx)
-    if mod(n,12) == 1
+    if mod(n,24) == 1
         bigTick(n) = 0.14;
     end
     
     if length(plotx) <= 24+1 && mod(n,6) == 1
-        xLabel{n} = datestr(plotx(n), 'mm-dd ddd HH:MM');
+        xLabel{n} = datestr(plotx(n), 'mm-dd HH:MM');
+%         xLabel{n} = datestr(plotx(n), 'mm-dd ddd. HH:MM');
     end
     
     if length(plotx) > 24+1 && length(plotx) <= 24*7+1 && mod(n,12) == 1
-        xLabel{n} = datestr(plotx(n), 'mm-dd ddd HH:MM');
+        xLabel{n} = datestr(plotx(n), 'mm-dd HH:MM');
     end
     
     if length(plotx) > 24*7+1 &&  length(plotx) <= 24*31+1 && mod(n,24) == 1
-        bigTick(n) = 0.2;
-        xLabel{n} = datestr(plotx(n), 'mm-dd ddd HH:MM');
+        bigTick(n) = 0.3;
+        xLabel{n} = datestr(plotx(n), 'mm-dd HH:MM');
     end
     
     if length(plotx) > 24*31+1 && length(plotx) <= 24*31*3+1 && mod(n,24*7) == 1
-        xLabel{n} = datestr(plotx(n), 'mm-dd ddd HH:MM');
+        xLabel{n} = datestr(plotx(n), 'mm-dd HH:MM');
     end
     
     if length(plotx) > 24*31*3+1 && mod(n,24*7*2) == 1
-        xLabel{n} = datestr(plotx(n), 'mm-dd ddd HH:MM');
+        bigTick(n) = 0.3;
+        xLabel{n} = datestr(plotx(n), 'mm-dd HH:MM');
     end
 end
 xLabel{1} = ' '; % !!! make the 1st invisible
@@ -117,11 +119,13 @@ box off
 % ax.XTick = [];
 ax.XTickLabel = xLabel;
 ax.XTickLabelRotation = 12;  % rotation
+% ax.XLabel.FontSize = 14;
 ax.XColor = color.axis;
 ax.YColor = color.axis;
 ax.YTick = [];
 ax.YLabel.String = yStr;
-ax.YLabel.FontSize = 9;
+% ax.YLabel.FontSize = 14;
+set(gca, 'fontsize', 12);
 set(gca, 'fontname', 'Times New Roman', 'fontweight', 'bold');
 
 %% size control

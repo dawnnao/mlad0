@@ -12,13 +12,18 @@ function f = monthStatsPerSensor(stats, sensor, labelName, color)
 
 f = figure;
 h = bar3(stats);
-set(gca, 'fontsize', 20, 'fontname', 'Times New Roman', 'fontweight', 'bold')
-xlabel('Type');
-ylabel('Month');
+set(gca, 'fontsize', 26, 'fontname', 'Times New Roman', 'fontweight', 'bold')
+axisX = xlabel('Anomaly Pattern');
+axisY = ylabel('Month');
 ylim([0,13]);
 zlabel('Count (hours)');
-hTitle = title(sprintf('Sensor%02d', sensor));
-set(hTitle,'Position',[-5 3 440]);
+hTitle = title(sprintf('Channel %02d', sensor));
+% set(hTitle,'Position',[-5 3 440]);
+set(hTitle,'Position',[-7.5 4.4 483.7]);
+
+
+set(axisX,'Rotation', -28);
+set(axisY,'Rotation', 28);
 
 % pTitle = get(hTitle,'Position');
 % set(hTitle,'Position',[pTitle(1) pTitle(2)+0.3 pTitle(3)])
