@@ -15,7 +15,7 @@ data = data - repmat(mean(data),[72000,1]);
 figure
 plot(t,data(:,channel));
 % plot(t,data(:,1),t,data(:,2),t,data(:,3));
-xlabel('Time(sec)');
+xlabel('Time (s)');
 ylabel('Accel. (m/s^2)');
 xlim([0 3600]);
 ylim([-0.8 0.6]);
