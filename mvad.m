@@ -794,25 +794,25 @@ hourTotal = (date.serial.end-date.serial.start+1)*24;
 
 % reportCover; % make report cover!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-% % plot panorama
-% dirName.plotPano = [dirName.home '/plot/panorama'];
-% if ~exist(dirName.plotPano, 'dir'), mkdir(dirName.plotPano); end
-% for s = sensor.numVec
-%     if mod(s,2) == 1
-%         yStrTemp = '';
-%     else
-%         yStrTemp = sprintf('      %02d', s);
-%     end
-%     panorama(sensor.date.serial{s}, sensor.label.neuralNet{s}, yStrTemp, color(1:labelTotal));
-%     dirName.panorama{s} = [sprintf('%s--%s_sensor_%02d', date.start, date.end, s) '_anomalyDetectionPanorama.png'];
-%     saveas(gcf,[dirName.plotPano '/' dirName.panorama{s}]);
-%     fprintf('\nSenor-%02d anomaly detection panorama file location:\n%s\n', ...
-%         s, GetFullPath([dirName.plotPano '/' dirName.panorama{s}]))
-%     close
-%     
-%     % update sensor.status
-%     sensor.status{s}(2,5) = {1};
-% end
+% plot panorama
+dirName.plotPano = [dirName.home '/plot/panorama'];
+if ~exist(dirName.plotPano, 'dir'), mkdir(dirName.plotPano); end
+for s = sensor.numVec
+    if mod(s,2) == 1
+        yStrTemp = '';
+    else
+        yStrTemp = sprintf('      %02d', s);
+    end
+    panorama(sensor.date.serial{s}, sensor.label.neuralNet{s}, yStrTemp, color(1:labelTotal));
+    dirName.panorama{s} = [sprintf('%s--%s_sensor_%02d', date.start, date.end, s) '_anomalyDetectionPanorama.png'];
+    saveas(gcf,[dirName.plotPano '/' dirName.panorama{s}]);
+    fprintf('\nSenor-%02d anomaly detection panorama file location:\n%s\n', ...
+        s, GetFullPath([dirName.plotPano '/' dirName.panorama{s}]))
+    close
+    
+    % update sensor.status
+    sensor.status{s}(2,5) = {1};
+end
 % 
 % n = 0;
 % panopano = [];
