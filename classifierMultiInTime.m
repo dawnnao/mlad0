@@ -1,4 +1,4 @@
-function [label, labelCount, dateVec, dateSerial] = classifierMulti(pathRead, sensorNum, dayStart, dayEnd, pathSave, labelName, neuralNet)
+function [label, labelCount, dateVec, dateSerial] = classifierMultiInTime(pathRead, sensorNum, dayStart, dayEnd, pathSave, labelName, neuralNet)
 % DESCRIPTION:
 %   This is a subfunction of mvad.m, to do step 4 anomaly detection.
 
