@@ -29,7 +29,11 @@ plotx = [xSerial; xSerial(end)+interval];
 ploty = zeros(length(legendColor), size(yLabel, 2));
 
 for l = 1:length(legendColor)
-    ploty(l, find(yLabel == l)) = 1;
+    if iscategorical(yLabel)
+        ploty(l, find(yLabel == categorical(l))) = 1;
+    else
+        ploty(l, find(yLabel == l)) = 1;
+    end
 end
 
 zeroSet = [2 3; 3 1; 1 2];
