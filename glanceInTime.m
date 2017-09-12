@@ -1,4 +1,4 @@
-function [sensorData, dateVec, dateSerial] = glance(pathRead, sensorNum, dayStart, dayEnd, pathSave, prefix)
+function [sensorData, dateVec, dateSerial] = glanceInTime(pathRead, sensorNum, dayStart, dayEnd, pathSave, prefix)
 % DESCRIPTION:
 %   This is a subfunction of mvad.m, to read user specified data, and
 %   display progress in command window.
