@@ -2,7 +2,8 @@ clear;clc;close all;
 
 
 readRoot = 'E:/dataArchive/Sutong';
-saveRoot = 'C:/Users/Owner/Documents/GitHub/adi/case';
+% saveRoot = 'C:/Users/Owner/Documents/GitHub/adi/case'; % not this (9 labels)
+saveRoot = 'E:/results/adi_paper1';
 
 % saveRoot = 'F:/adi/case';
 
@@ -18,7 +19,7 @@ dateStart = '2012-01-01';
 dateEnd = '2012-12-31';
 sensorTrainRatio = 1/100;
 sensorPSize = 10;
-step = [5];
+step = [4 5];
 % labelName = {'1-normal','2-missing','3-minor','4-outlier','5-square','6-trend up','7-trend down','8-trend random'};
 
 %%
