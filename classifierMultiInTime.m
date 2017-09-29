@@ -78,6 +78,14 @@ for day = dayStart : dayEnd
         
         end
         count = count+1;
+        
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% temp
+        if mod(count, 200) == 0
+           fprintf('\nPause for cooling\n') 
+           pause
+        end
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        
         sensorData = [];
     end
 end
