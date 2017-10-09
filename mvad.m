@@ -188,7 +188,7 @@ for g = 1 : groupTotal
         end
 
         [~, sensor.date.vec{s}, sensor.date.serial{s}] = ...
-            glance(readRoot, s, date.serial.start, date.serial.end, dirName.all{s}, '0-all_');
+            glanceInTime(readRoot, s, date.serial.start, date.serial.end, dirName.all{s}, '0-all_');
     %     util.hours = size(sensor.date.vec{s}, 1);
 
         elapsedTime(1) = toc(t(1)); [hours, mins, secs] = sec2hms(elapsedTime(1));
@@ -515,7 +515,7 @@ for g = 1 : groupTotal
     end
 end
 
-seed = 9;
+seed = 8;
 rng(seed,'twister');
 fprintf('\nTraining...\n')
 for g = 1 : groupTotal
@@ -535,7 +535,8 @@ for g = 1 : groupTotal
             'L2WeightRegularization',0.004, ...
             'SparsityRegularization',4, ...
             'SparsityProportion',0.15, ...
-            'ScaleData', false);
+            'ScaleData', false, ...
+            'UseGPU', true);
         feat{1} = encode(autoenc{1},feature{g}.image(:,1 : feature{g}.trainSize));
         % hidden layer 2
         hiddenSize(2) = 75;
@@ -544,7 +545,8 @@ for g = 1 : groupTotal
             'L2WeightRegularization',0.002, ...
             'SparsityRegularization',4, ...
             'SparsityProportion',0.1, ...
-            'ScaleData', false);
+            'ScaleData', false, ...
+            'UseGPU', true);
         feat{2} = encode(autoenc{2},feat{1});
         % hidden layer 3
         hiddenSize(3) = 50;
@@ -553,7 +555,8 @@ for g = 1 : groupTotal
             'L2WeightRegularization',0.002, ...
             'SparsityRegularization',4, ...
             'SparsityProportion',0.1, ...
-            'ScaleData', false);
+            'ScaleData', false, ...
+            'UseGPU', true);
         feat{3} = encode(autoenc{3},feat{2});
         % softmax classifier
         softnet = trainSoftmaxLayer(feat{3}, feature{g}.label.manual(:,1 : feature{g}.trainSize),...
@@ -572,7 +575,7 @@ for g = 1 : groupTotal
 %         sensor.neuralNet{s}.divideParam.valRatio = 15/100;
 %         sensor.neuralNet{s}.divideParam.testRatio = 15/100;
         [sensor.neuralNet{s},sensor.trainRecord{s}] = train(sensor.neuralNet{s}, ...
-            feature{g}.image(:,1 : feature{g}.trainSize), feature{g}.label.manual(:,1 : feature{g}.trainSize));
+            feature{g}.image(:,1 : feature{g}.trainSize), feature{g}.label.manual(:,1 : feature{g}.trainSize), 'useGPU', 'yes');
         nntraintool close
         
         
