@@ -19,8 +19,12 @@ ylim([0,13]);
 zlabel('Count (hours)');
 hTitle = title(sprintf('Channel %02d', sensor));
 % set(hTitle,'Position',[-5 3 440]);
-set(hTitle,'Position',[-7.5 4.4 483.7]);
 
+%%
+% set(hTitle,'Position',[-7.5 4.4 483.7]);
+
+set(hTitle,'Position',[-7.2 4.58 316.2]);
+%%
 
 set(axisX,'Rotation', -28);
 set(axisY,'Rotation', 28);

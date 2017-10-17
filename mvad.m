@@ -262,7 +262,7 @@ date.serial.start = datenum(date.start, dirName.formatIn);  % day numbers from y
 date.serial.end   = datenum(date.end, dirName.formatIn);
 hourTotal = (date.serial.end-date.serial.start+1)*24;
 
-seed = 3;  %intialize
+seed = 4;  %intialize
 goNext = 0;
 while goNext == 0
     % randomization
@@ -515,7 +515,7 @@ for g = 1 : groupTotal
     end
 end
 
-seed = 9;
+seed = 8;
 rng(seed,'twister');
 fprintf('\nTraining...\n')
 for g = 1 : groupTotal
@@ -531,7 +531,7 @@ for g = 1 : groupTotal
         hiddenSize(1) = 100;
         autoenc{1} = trainAutoencoder(feature{g}.image(:,1 : feature{g}.trainSize),...
             hiddenSize(1), ...
-            'MaxEpochs',200, ...
+            'MaxEpochs',110, ...
             'L2WeightRegularization',0.004, ...
             'SparsityRegularization',4, ...
             'SparsityProportion',0.15, ...
@@ -581,6 +581,7 @@ for g = 1 : groupTotal
         
         yTrain = sensor.neuralNet{s}(feature{g}.image(:,1 : feature{g}.trainSize));
         yVali = sensor.neuralNet{s}(feature{g}.image(:,feature{g}.trainSize+1 : end));
+        
         temp.jFrame = view(sensor.neuralNet{s});
         % create it in a MATLAB figure
         temp.hFig = figure('Menubar','none', 'Position',[100 100 960 166]);
@@ -604,7 +605,7 @@ for g = 1 : groupTotal
         close
         
         figure
-        plotconfusion(feature{g}.label.manual(:,1 : feature{g}.trainSize), yTrain);
+        plotconfusion(yTrain, feature{g}.label.manual(:,1 : feature{g}.trainSize));
         xlabel('Predicted');
         ylabel('Actual');
         title([]);
@@ -618,11 +619,11 @@ for g = 1 : groupTotal
         ax_width = outerpos(3) - ti(1) - ti(3);
         ax_height = outerpos(4) - ti(2) - ti(4) - 0.03;
         ax.Position = [left bottom ax_width ax_height];
-        saveas(gcf,[dirName.net sprintf('/group-%d_netConfuseTrain.png', g)]);
+        saveas(gcf,[dirName.net sprintf('/group-%d_netConfuseTrain.emf', g)]);
         close
         
         figure
-        plotconfusion(feature{g}.label.manual(:,feature{g}.trainSize+1 : end), yVali);
+        plotconfusion(yVali, feature{g}.label.manual(:,feature{g}.trainSize+1 : end));
         xlabel('Predicted');
         ylabel('Actual');
         title([]);
@@ -636,7 +637,7 @@ for g = 1 : groupTotal
         ax_width = outerpos(3) - ti(1) - ti(3);
         ax_height = outerpos(4) - ti(2) - ti(4) - 0.03;
         ax.Position = [left bottom ax_width ax_height];
-        saveas(gcf,[dirName.net sprintf('/group-%d_netConfuseVali.png', g)]);
+        saveas(gcf,[dirName.net sprintf('/group-%d_netConfuseVali.emf', g)]);
         close
         clear h jpanel
         temp = rmfield(temp, {'jFrame', 'hFig'});
@@ -848,7 +849,7 @@ for s = sensor.numVec
         end
     end
     monthStatsPerSensorForPaper(sensor.statsPerSensor{s}, s, sensor.label.name, color);
-    dirName.statsPerSensor{s} = [sprintf('%s--%s_sensor_%02d', date.start, date.end, s) '_anomalyStats.png'];
+    dirName.statsPerSensor{s} = [sprintf('%s--%s_sensor_%02d', date.start, date.end, s) '_anomalyStats.emf'];
     saveas(gcf,[dirName.plotSPS '/' dirName.statsPerSensor{s}]);
     fprintf('\nSenor-%02d anomaly stats bar-plot file location:\n%s\n', ...
         s, GetFullPath([dirName.plotSPS '/' dirName.statsPerSensor{s}]))
@@ -870,7 +871,7 @@ for l = 1 : labelTotal
    end
    if sum(sum(sensor.statsPerLabel{l})) > 0
         monthStatsPerLabelForPaper(sensor.statsPerLabel{l}, l, sensor.label.name{l}, color);
-        dirName.statsPerLabel{l} = sprintf('%s--%s_sensor%s_anomalyStats_%s.png', ...
+        dirName.statsPerLabel{l} = sprintf('%s--%s_sensor%s_anomalyStats_%s.emf', ...
             date.start, date.end, sensorStr, sensor.label.name{l});
         saveas(gcf,[dirName.plotSPT '/' dirName.statsPerLabel{l}]);
         fprintf('\n%s anomaly stats bar-plot file location:\n%s\n', ...
@@ -909,7 +910,7 @@ end
 set(gca, 'fontsize', 13, 'fontname', 'Times New Roman', 'fontweight', 'bold');
 set(gcf,'Units','pixels','Position',[100, 100, 1000, 500]);  % control figure's position
 xlim([0 39]);
-ylim([3000 9000]);
+ylim([0 9000]);
 set(gca,'xtick',[1,5:5:35, 38]);
 
 % minimize white space
@@ -922,11 +923,11 @@ ax_width = outerpos(3) - ti(1) - ti(3) - 0.01;
 ax_height = outerpos(4) - ti(2) - ti(4);
 ax.Position = [left bottom ax_width ax_height];
 
-dirName.statsSum = sprintf('%s--%s_sensor%s_anomalyStats.png', ...
+dirName.statsSum = sprintf('%s--%s_sensor%s_anomalyStats.emf', ...
     date.start, date.end, sensorStr);
 
 saveas(gcf,[dirName.plotSum '/' dirName.statsSum]);
-dirName.statsSum = sprintf('%s--%s_sensor%s_anomalyStats.png', ...
+dirName.statsSum = sprintf('%s--%s_sensor%s_anomalyStats.emf', ...
     date.start, date.end, sensorStr);
 saveas(gcf,[dirName.plotSum '/' dirName.statsSum]);
 fprintf('\nSum-up anomaly stats image file location:\n%s\n', ...
@@ -946,17 +947,17 @@ sensor.ratioOfCategory(1,end) = sum(sensor.ratioOfCategory(1,:));
 sensor.ratioOfCategory(2,:) = (sensor.ratioOfCategory(1,:)./(sensor.ratioOfCategory(1,end)-sensor.ratioOfCategory(1,1))).*100;
 sensor.ratioOfCategory(3,:) = (sensor.ratioOfCategory(1,:)./sensor.ratioOfCategory(1,end)).*100;
 
-% crop legend to panorama's folder
-img = imread([dirName.plotSum '/' dirName.statsSum]);
-if ispc
-%     imgLegend = imcrop(img, [646.5 42.5 172 300]);
-    imgLegend = imcrop(img, [596.5 36.5 272 232]);
-elseif ismac
-%     imgLegend = imcrop(img, [660.5 42.5 160 229]);
-    imgLegend = imcrop(img, [882.5 57.5 204 280]);
-end
-figure, imshow(imgLegend)
-saveas(gcf, [dirName.plotPano '/legend.png']); close
+% % crop legend to panorama's folder
+% img = imread([dirName.plotSum '/' dirName.statsSum]);
+% if ispc
+% %     imgLegend = imcrop(img, [646.5 42.5 172 300]);
+%     imgLegend = imcrop(img, [596.5 36.5 272 232]);
+% elseif ismac
+% %     imgLegend = imcrop(img, [660.5 42.5 160 229]);
+%     imgLegend = imcrop(img, [882.5 57.5 204 280]);
+% end
+% figure, imshow(imgLegend)
+% saveas(gcf, [dirName.plotPano '/legend.png']); close
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% temp
 sensorLabelNetSerial = [];
@@ -1057,8 +1058,8 @@ while n <= util.hours
         xlim([0 size(sensor.data{s},1)]);
 
         % save fixed data plot
-        saveas(gcf,[dirName.outlierCleaned '/outlierCleaned_' num2str(n) '.png']);
-        temp.image = imread([dirName.outlierCleaned '/outlierCleaned_' num2str(n) '.png']);
+        saveas(gcf,[dirName.outlierCleaned '/outlierCleaned_' num2str(n) '.emf']);
+        temp.image = imread([dirName.outlierCleaned '/outlierCleaned_' num2str(n) '.emf']);
         temp.image = rgb2gray(temp.image);
         temp.image = im2double(temp.image(:));
         sensor.image{s}(:,n) = temp.image;  % update sensor.image
