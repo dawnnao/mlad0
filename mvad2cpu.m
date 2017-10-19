@@ -1,4 +1,4 @@
- function sensor = mvad2(readRoot, saveRoot, sensorNum, dateStart, dateEnd, sensorTrainRatio, sensorPSize, step, labelName, seed, maxEpoch)
+ function sensor = mvad2cpu(readRoot, saveRoot, sensorNum, dateStart, dateEnd, sensorTrainRatio, sensorPSize, step, labelName, seed)
 % DESCRIPTION:
 %   This is a machine vision based anomaly detection (MVAD) pre-processing
 %   function for structural health monitoring data. The work flow is:
@@ -142,7 +142,7 @@ elseif groupTotal > 1 && groupTotal < sensorTotal
 end
 
 dirName.home = sprintf('%s/%s--%s_sensor%s%s_seed_%d_trainRatio_%dpct', saveRoot, date.start, date.end, sensorStr, netLayout, seed, sensorTrainRatio*100);
-dirName.file = sprintf('%s--%s_sensor%s%s_autoenc1epoch_%d_globalEpoch_%d.mat', date.start, date.end, sensorStr, netLayout, maxEpoch(1), maxEpoch(2));
+dirName.file = sprintf('%s--%s_sensor%s%s.mat', date.start, date.end, sensorStr, netLayout);
 dirName.status = sprintf('%s--%s_sensor%s%s_status.mat', date.start, date.end, sensorStr, netLayout);
 
 if ~exist(dirName.home,'dir'), mkdir(dirName.home); end
@@ -470,6 +470,7 @@ for g = 1 : groupTotal
         feature{g}.trainSize = floor(size(feature{g}.image,2) * feature{g}.trainRatio);
         % hidden layer 1
         hiddenSize(1) = 100;
+        maxEpoch(1) = 200;
         autoenc{1} = trainAutoencoder(feature{g}.image(:,1 : feature{g}.trainSize),...
             hiddenSize(1), ...
             'MaxEpochs',maxEpoch(1), ...
@@ -477,12 +478,12 @@ for g = 1 : groupTotal
             'SparsityRegularization',4, ...
             'SparsityProportion',0.15, ...
             'ScaleData', false, ...
-            'UseGPU', true);
+            'UseGPU', false);
         feat{1} = encode(autoenc{1},feature{g}.image(:,1 : feature{g}.trainSize));
         % hidden layer 2
         hiddenSize(2) = 75;
         autoenc{2} = trainAutoencoder(feat{1},hiddenSize(2), ...
-            'MaxEpochs',maxEpoch(2), ...
+            'MaxEpochs',500, ...
             'L2WeightRegularization',0.002, ...
             'SparsityRegularization',4, ...
             'SparsityProportion',0.1, ...
@@ -492,7 +493,7 @@ for g = 1 : groupTotal
         % hidden layer 3
         hiddenSize(3) = 50;
         autoenc{3} = trainAutoencoder(feat{2},hiddenSize(3), ...
-            'MaxEpochs',maxEpoch(2), ...
+            'MaxEpochs',500, ...
             'L2WeightRegularization',0.002, ...
             'SparsityRegularization',4, ...
             'SparsityProportion',0.1, ...
@@ -501,7 +502,7 @@ for g = 1 : groupTotal
         feat{3} = encode(autoenc{3},feat{2});
         % softmax classifier
         softnet = trainSoftmaxLayer(feat{3}, feature{g}.label.manual(:,1 : feature{g}.trainSize),...
-            'MaxEpochs',maxEpoch(2));
+            'MaxEpochs',500);
         % stack
         sensor.neuralNet{s} = stack(autoenc{1},autoenc{2},autoenc{3},softnet);
 %         view(sensor.neuralNet{s})
@@ -523,7 +524,7 @@ for g = 1 : groupTotal
         yTrain = sensor.neuralNet{s}(feature{g}.image(:,1 : feature{g}.trainSize));
         yVali = sensor.neuralNet{s}(feature{g}.image(:,feature{g}.trainSize+1 : end));
         
-        dirName.net = [dirName.home sprintf('/net_autoenc1epoch_%d_globalEpoch_%d', maxEpoch(1), maxEpoch(2))];
+        dirName.net = [dirName.home sprintf('/net_autoenc1epoch_%d', maxEpoch(1))];
         if ~exist(dirName.net,'dir'), mkdir(dirName.net); end
         
         temp.jFrame = view(sensor.neuralNet{s});

@@ -62,8 +62,8 @@ for day = dayStart : dayEnd
 
             label{s}(count) = vec2ind(neuralNet{s}(img(:))); % !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! nn
 
-            pathSaveAll = [pathSaveNet{s,label{s}(count)} '/' labelName{label{s}(count)} '_' num2str(count) '.png'];
-            imwrite(img, pathSaveAll);
+%             pathSaveAll = [pathSaveNet{s,label{s}(count)} '/' labelName{label{s}(count)} '_' num2str(count) '.png'];
+%             imwrite(img, pathSaveAll);
 
             tocRemain = toc(ticRemain);
             tRemain = tocRemain * (hourTotal - count) * length(sensorNum);
