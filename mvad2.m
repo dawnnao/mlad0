@@ -1,4 +1,4 @@
- function sensor = mvad(readRoot, saveRoot, sensorNum, dateStart, dateEnd, sensorTrainRatio, sensorPSize, step, labelName)
+ function sensor = mvad2(readRoot, saveRoot, sensorNum, dateStart, dateEnd, sensorTrainRatio, sensorPSize, step, labelName, seed)
 % DESCRIPTION:
 %   This is a machine vision based anomaly detection (MVAD) pre-processing
 %   function for structural health monitoring data. The work flow is:
@@ -141,7 +141,7 @@ elseif groupTotal > 1 && groupTotal < sensorTotal
     netLayout = '_customGroups';
 end
 
-dirName.home = sprintf('%s/%s--%s_sensor%s%s', saveRoot, date.start, date.end, sensorStr, netLayout);
+dirName.home = sprintf('%s/%s--%s_sensor%s%s_seed_%d_trainRatio_%dpct', saveRoot, date.start, date.end, sensorStr, netLayout, seed, sensorTrainRatio*100);
 dirName.file = sprintf('%s--%s_sensor%s%s.mat', date.start, date.end, sensorStr, netLayout);
 dirName.status = sprintf('%s--%s_sensor%s%s_status.mat', date.start, date.end, sensorStr, netLayout);
 
@@ -232,12 +232,12 @@ end
 
 %% 2 manually make training set
 if ismember(2, step) || isempty(step)
-dirName.mat = [GetFullPath(dirName.home) '/trainingSetMat'];
-if exist(dirName.mat,'dir')
-    check = ls(dirName.mat);
+dirName.trainSetByType = [GetFullPath(dirName.home) '/trainingSetByType/'];
+if exist(dirName.trainSetByType,'dir')
+    check = ls(dirName.trainSetByType);
     if ispc, check(1:4) = []; end
     if ~isempty(check)
-        fprintf('\nCAUTION:\n%s\nTraining set folder is already there and not empty, continue?\n', dirName.mat)
+        fprintf('\nCAUTION:\n%s\nTraining set folder is already there and not empty, continue?\n', dirName.trainSetByType)
         rightInput = 0;
         while rightInput == 0
             prompt = 'y(yes)/n(no): ';
@@ -254,7 +254,7 @@ if exist(dirName.mat,'dir')
             end
         end
     end
-elseif ~exist(dirName.mat,'dir'), mkdir(dirName.mat);
+elseif ~exist(dirName.trainSetByType,'dir'), mkdir(dirName.trainSetByType);
 end
 
 dirName.formatIn = 'yyyy-mm-dd';
@@ -262,154 +262,105 @@ date.serial.start = datenum(date.start, dirName.formatIn);  % day numbers from y
 date.serial.end   = datenum(date.end, dirName.formatIn);
 hourTotal = (date.serial.end-date.serial.start+1)*24;
 
-seed = 4;  %intialize
+t(2) = tic;
 goNext = 0;
 while goNext == 0
-    % randomization
-    rng(seed,'twister');
-    sensor.random = randperm(hourTotal);
-    
-    for g = 1 : groupTotal
-    for s = sensor.num{g}
-    
-%     for s = sensor.num
-        t(2) = tic;
-        sensor.label.manual{s} = zeros(labelTotal,hourTotal);
-        % manually label
-        sensor.trainSetSize(s) = ceil(sensor.trainRatio(s) * hourTotal);
-        figure
-        set(gcf,'Units','pixels','Position',[100, 100, 300, 300]);
-        n = 1;
-        while n <= sensor.trainSetSize(s)
-            sensor.label.manual{s}(:,sensor.random(n)) = zeros(labelTotal,1);  % initialize for re-label if necessary
-            
-            [random.date, random.hour] = colLocation(sensor.random(n), date.start);
-            random.path = [readRoot '/' random.date '/' random.date sprintf(' %02d-VIB.mat',random.hour)];
-            
-            if ~exist(random.path, 'file')
-                fprintf('\nCAUTION:\n%s\nNo such file! Filled with a zero.\n', random.path)
-                sensor.data{s}(1, sensor.random(n)) = zeros;
-            else
-                read = ['load(''' random.path ''');']; eval(read);
-                sensor.data{s}(:, sensor.random(n)) = data(:, s);
-            end
-            clear data
-            plot(sensor.data{s}(:,sensor.random(n)),'color','k');
-            position = get(gcf,'Position');
-            set(gcf,'Units','pixels','Position',[position(1), position(2), 300, 300]);  % control figure's position
-            set(gca,'Units','normalized', 'Position',[0.1300 0.1100 0.7750 0.8150]);  % control axis's position in figure
-            xlim([0 size(sensor.data{s},1)]);
-            fprintf('\nSensor-%02d trainning set size: %d  Now: %d\n', s, sensor.trainSetSize(s), n)
-            fprintf('Data type:')
-            for l = 1 : labelTotal
-                fprintf('\n%s', sensor.label.name{l})
-            end
-            prompt = '\nInput: ';
-            classify = input(prompt,'s');
-            classify = str2double(classify);  % filter charactor input
-            if classify <= labelTotal && classify >= 1
-                sensor.label.manual{s}(classify,sensor.random(n)) = 1;
-                n = n + 1;
-            elseif classify == 0
-                if n > 1
-                    fprintf('\nRedo previous one.\n')
-                    n = n - 1;
-                else fprintf('\nThis is already the first!\n')
-                end
-            else
-                fprintf('\n\n\n\n\n\nInvalid input! Input 1-9 for labelling, 0 for redoing previous one.\n')
+    for g = 1 : groupTotal % ingore group in mvad2.m
+        labelTemp = load('C:\Users\Owner\Documents\GitHub\mlad\trainingSet_justLabel_inSensorCell_drift_modified2.mat'); % label2012
+        label2012.bySensor = labelTemp.sensor.label.manual;
+        clear labelTemp;
+        
+        for n = 1 : labelTotal
+            label2012.byType{n} = [];
+            label2012.absIdx{n} = [];
+            label2012.image{n} = [];
+        end
+        
+        % count labels by type
+        for s = sensor.num{g}
+            for n = 1 : labelTotal
+                labelByType = find(label2012.bySensor{s} == n)';
+                labelByType = [s*ones(size(labelByType)) labelByType];
+                label2012.byType{n} = cat(1, label2012.byType{n}, labelByType);
+                labelByType = [];
             end
         end
-        close
+        clear labelByType
         
-%         ticRemain = tic;
-        c = 0; % total count initialize
-        for l = 1 : labelTotal
-            % find label and corresponding data
-            count.label{l,s} = find(sensor.label.manual{s}(l,:));
-            manual.label{l}.data{s} = sensor.data{s}(:,count.label{l,s});
-            % generate all-type folders
-            dirName.label.manual{l,s} = [dirName.sensor{s} '/' sensor.label.name{l} '/manual'];
-            if ~exist(dirName.label.manual{l,s},'dir'), mkdir(dirName.label.manual{l,s}); end
-            dirName.label.net{l,s} = [dirName.sensor{s} '/' sensor.label.name{l} '/neuralNet'];
-            if ~exist(dirName.label.net{l,s},'dir'), mkdir(dirName.label.net{l,s}); end
-            % generate image vectors
-            manual.label{l}.image{s} = [];
-            figure
-            for n = 1:size(manual.label{l}.data{s},2)
-                c = c + 1;
-                fprintf('\nGenerating sensor-%02d images of %s data in training set...\nNow: %d  Total: %d  ',...
-                    s, sensor.label.name{l}, n, size(manual.label{l}.data{s},2))
-                plot(manual.label{l}.data{s}(:,n),'color','k');
+        label2012.ratioByType = [];
+        label2012.amount = size(label2012.bySensor{n}, 2) * size(label2012.bySensor, 2);
+        for n = 1 : labelTotal
+            label2012.ratioByType(n) = size(label2012.byType{n}, 1) / label2012.amount * 100;
+        end
+        
+        label2012.trainRatioByType = label2012.ratioByType + [-10.2679 -2 -2 3 -1.4321 6 6.7];
+        label2012.trainNum = ceil(label2012.amount * label2012.trainRatioByType/100 * sensorTrainRatio);
+        
+        % extra numbers will add to the previous type
+        for n = 1 : labelTotal
+            nn = labelTotal+1 - n;
+            if label2012.trainNum(nn) > size(label2012.byType{nn}, 1)
+                diffe(nn) = label2012.trainNum(nn) - size(label2012.byType{nn}, 1);
+                label2012.trainNum(nn) = size(label2012.byType{nn}, 1);
+                label2012.trainNum(nn-1) = label2012.trainNum(nn-1) + diffe(nn);
+            end
+        end
+        % remove redundant number
+        label2012.trainNum(1) = label2012.trainNum(1) - (sum(label2012.trainNum) - ceil(label2012.amount * sensorTrainRatio));
+        
+        % get abs index
+        for n = 1 : labelTotal
+            rng(seed + n)
+            label2012.idxInType{n} = randperm(size(label2012.byType{n}, 1), label2012.trainNum(n))';
+            label2012.absIdx{n} = label2012.byType{n}(label2012.idxInType{n}, :);
+        end
+        
+        % get image        
+        for n = 1 : labelTotal
+            if ~exist([dirName.trainSetByType labelName{n}], 'dir')
+                mkdir([dirName.trainSetByType labelName{n}]);
+            end
+            for m = 1 : label2012.trainNum(n)
+                [day, hour] = colLocation(label2012.absIdx{n}(m, 2) ,'2012-01-01');
+                dateVec(1, :) = datevec(day,'yyyy-mm-dd');
+                dateVec(1, 4) = hour;
+                path.folder = sprintf('%04d-%02d-%02d', dateVec(1,1),dateVec(1,2), dateVec(1,3));
+                path.file = [path.folder sprintf(' %02d-VIB.mat', hour)];
+                path.full = [readRoot '/' path.folder '/' path.file];
+                if ~exist(path.full, 'file')
+                    fprintf('\nCAUTION:\n%s\nNo such file! Filled with a zero.\n', path.full)
+                    sensorData(1, 1) = zeros;  % always save in column 1
+                else
+                    read = ['load(''' path.full ''');']; eval(read);
+                    sensorData(:, 1) = data(:, label2012.absIdx{n}(m, 1));  % always save in column 1
+                end
+                
+                fprintf('\nGenerating training set... %s Now: %d Total: %d\n', labelName{n}, m, label2012.trainNum(n))
+                plot(sensorData(:, 1),'color','k');
                 position = get(gcf,'Position');
-                set(gcf,'Units','pixels','Position',[position(1) position(2) 100 100]);  % control figure's position
+                set(gcf,'Units','pixels','Position',[position(1), position(2), 100, 100]);  % control figure's position
                 set(gca,'Units','normalized', 'Position',[0 0 1 1]);  % control axis's position in figure
                 set(gca,'visible','off');
-                xlim([0 size(manual.label{l}.data{s},1)]);
+                xlim([0 size(sensorData,1)]);
                 set(gcf,'color','white');
-
                 img = getframe(gcf);
                 img = imresize(img.cdata, [100 100]);  % expected dimension
                 img = rgb2gray(img);
                 img = im2double(img);
-                % imshow(img)
-                imwrite(img,[dirName.label.manual{l,s} sprintf('/%s_', sensor.label.name{l}) num2str(count.label{l,s}(n)) '.png']);
-                manual.label{l}.image{s}(:,n) = img(:);
-%                 tocRemain = toc(ticRemain);
-%                 tRemain = tocRemain * (sensor.trainSetSize(s)*length(sensor.num) - c) / c;
-%                 [hours, mins, secs] = sec2hms(tRemain);
-%                 fprintf('About %02dh%02dm%05.2fs left.\n', hours, mins, secs)
+                imshow(img)
+                imwrite(img, [dirName.trainSetByType labelName{n} ...
+                    sprintf('/%s_absIdx_%02d_%d.png', labelName{n}, label2012.absIdx{n}(m, 1), label2012.absIdx{n}(m, 2))]);
+                label2012.image{n}(:, m) = single(img(:));
             end
-            close
             clear img
-            % delete useless folder(s)
-            check = ls(dirName.label.manual{l,s});
-            if ispc, check(1:4) = []; end
-            if isempty(check), rmdir([dirName.sensor{s} '/' sensor.label.name{l}], 's'); end
-            
+            label2012.imgLabel{n} = zeros(labelTotal, label2012.trainNum(n));
+            label2012.imgLabel{n}(n, :) = 1;
         end
+        close
         
-        % pass to 'temp' suffix variables
-        labelTemp = sensor.label.manual{s};
-        for l = 1 : labelTotal
-            manualTemp{l} = manual.label{l}.image{s};
-            countTemp{l} = count.label{l,s};
-        end
-        % delete big and useless variables
-        for l = 1 : labelTotal
-            manual.label{l} = rmfield(manual.label{l}, 'data');
-        end
-        sensor = rmfield(sensor, 'data');
-        % save single sensor data
-        dirName.matPart{s} = [dirName.mat sprintf('/sensor%02d.mat', s)];
-        if exist(dirName.matPart{s}, 'file'), delete(dirName.matPart{s}); end
-        fprintf('\nSaving sensor-%02d training set...\nLocation: %s\n', s, dirName.matPart{s})
-        save(dirName.matPart{s}, 'labelTemp', 'manualTemp', 'countTemp', '-v7.3')
-        
-        elapsedTime(2) = toc(t(2));
-        [hours, mins, secs] = sec2hms(elapsedTime(2));
-        fprintf('\nSensor-%02d training set making time consumption: %02dh%02dm%05.2fs\n\n\n\n', s, hours, mins, secs)
+        save([dirName.trainSetByType 'trainSetByType.mat'], 'label2012', '-v7.3')
     end
-    end
-    
-    sensor = rmfield(sensor, 'random');
     goNext = 1;
-    
-%     fprintf('\nGo on, or re-random sampling and re-label data for any missing types?\n')
-%     rightInput = 0;
-%     while rightInput == 0
-%         prompt = 'g(go)/r(redo): ';
-%         go = input(prompt,'s');
-%         if strcmp(go,'r') || strcmp(go,'redo')
-%             rightInput = 1;
-%             seed = seed + 1;
-%         elseif strcmp(go,'g') || strcmp(go,'go')
-%             rightInput = 1;
-%             goNext = 1;
-%         else
-%             fprintf('Invalid input! Please re-input.\n')
-%         end
-%     end
     
 end
 
@@ -422,6 +373,8 @@ save(savePath, 'status', '-v7.3')
 elapsedTime(2) = toc(t(2)); [hours, mins, secs] = sec2hms(elapsedTime(2));
 fprintf('\n\n\nSTEP2:\nSensor(s) training set making completes, using %02d:%02d:%05.2f .\n', ...
     hours, mins, secs)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % ask go on or stop
 head = 'Continue to step3, automatically train deep neural network(s) now?';
@@ -457,29 +410,21 @@ if ~isempty(step) && step(1) == 3
     end
     newP{2,1} = sensor.pSize;
     newP{3,1} = step;
-    dirName.mat = [GetFullPath(dirName.home) '/trainingSetMat'];
+    dirName.trainSetByType = [GetFullPath(dirName.home) '/trainingSetByType/'];
     
     for g = 1 : groupTotal
-        for s = sensor.num{g}
-            dirName.matPart{s} = [dirName.mat sprintf('/sensor%02d.mat', s)];
-            if ~exist(dirName.matPart{s}, 'file')
-                fprintf('\nCAUTION:\nSensor-%02d traning set not found! Ignored it.\n', s)
-                index = find(sensor.num{g} == s);
-                sensor.num{g}(index) = [];
-            else
-                load(dirName.matPart{s});
-                sensor.label.manual{s} = labelTemp;
-                for l = 1 : labelTotal
-                    manual.label{l}.image{s} = manualTemp{l};
-                    count.label{l,s} = countTemp{l};
-                end
-                clear labelTemp manualTemp countTemp
-            end
-        end
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        
+                
+        load([dirName.trainSetByType 'trainSetByType.mat']);
+        
+        
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     end
     % update
     sensor.numVec = [];
     for g = 1 : groupTotal, sensor.numVec = [sensor.numVec sensor.num{g}(:)']; end
+    
     if isempty(sensor.numVec)
         fprintf('\nCAUTION:\nNo training set found in\n%s\n', dirName.mat)
         fprintf('Need to make trainning set (step2) first.\nFinish.\n')
@@ -500,22 +445,18 @@ date.serial.start = datenum(date.start, dirName.formatIn);  % day numbers from y
 date.serial.end   = datenum(date.end, dirName.formatIn);
 % hourTotal = (date.serial.end-date.serial.start+1)*24;
 
-dirName.net = [dirName.home '/net'];
-if ~exist(dirName.net,'dir'), mkdir(dirName.net); end
-
 fprintf('\nData combining...\n')
 for g = 1 : groupTotal
     feature{g}.image = [];
     feature{g}.label.manual = [];
-    for s = sensor.num{g}
-        for l = 1 : labelTotal
-            feature{g}.image = [feature{g}.image manual.label{l}.image{s}];  % modify here!
-            feature{g}.label.manual = [feature{g}.label.manual sensor.label.manual{s}(:,count.label{l,s})];  % modify here!
-        end
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    for l = 1 : 7 %labelTotal
+        feature{g}.image = [feature{g}.image label2012.image{l}];
+        feature{g}.label.manual = [feature{g}.label.manual label2012.imgLabel{l}];
     end
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 end
 
-seed = 8;
 rng(seed,'twister');
 fprintf('\nTraining...\n')
 for g = 1 : groupTotal
@@ -529,9 +470,10 @@ for g = 1 : groupTotal
         feature{g}.trainSize = floor(size(feature{g}.image,2) * feature{g}.trainRatio);
         % hidden layer 1
         hiddenSize(1) = 100;
+        maxEpoch(1) = 200;
         autoenc{1} = trainAutoencoder(feature{g}.image(:,1 : feature{g}.trainSize),...
             hiddenSize(1), ...
-            'MaxEpochs',100, ...
+            'MaxEpochs',maxEpoch(1), ...
             'L2WeightRegularization',0.004, ...
             'SparsityRegularization',4, ...
             'SparsityProportion',0.15, ...
@@ -582,6 +524,9 @@ for g = 1 : groupTotal
         yTrain = sensor.neuralNet{s}(feature{g}.image(:,1 : feature{g}.trainSize));
         yVali = sensor.neuralNet{s}(feature{g}.image(:,feature{g}.trainSize+1 : end));
         
+        dirName.net = [dirName.home sprintf('/net_autoenc1epoch_%d', maxEpoch(1))];
+        if ~exist(dirName.net,'dir'), mkdir(dirName.net); end
+        
         temp.jFrame = view(sensor.neuralNet{s});
         % create it in a MATLAB figure
         temp.hFig = figure('Menubar','none', 'Position',[100 100 960 166]);
@@ -619,7 +564,7 @@ for g = 1 : groupTotal
         ax_width = outerpos(3) - ti(1) - ti(3);
         ax_height = outerpos(4) - ti(2) - ti(4) - 0.03;
         ax.Position = [left bottom ax_width ax_height];
-        saveas(gcf,[dirName.net sprintf('/group-%d_netConfuseTrain.emf', g)]);
+        saveas(gcf,[dirName.net sprintf('/group-%d_netConfuseTrain.png', g)]);
         close
         
         figure
@@ -637,7 +582,7 @@ for g = 1 : groupTotal
         ax_width = outerpos(3) - ti(1) - ti(3);
         ax_height = outerpos(4) - ti(2) - ti(4) - 0.03;
         ax.Position = [left bottom ax_width ax_height];
-        saveas(gcf,[dirName.net sprintf('/group-%d_netConfuseVali.emf', g)]);
+        saveas(gcf,[dirName.net sprintf('/group-%d_netConfuseVali.png', g)]);
         close
         clear h jpanel
         temp = rmfield(temp, {'jFrame', 'hFig'});
