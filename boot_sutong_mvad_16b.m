@@ -23,13 +23,14 @@ dateStart = '2012-01-01';
 dateEnd = '2012-12-31';
 sensorTrainRatio = 1/100;
 sensorPSize = 10;
-step = [2 3];
+step = [3];
 % labelName = {'1-normal','2-missing','3-minor','4-outlier','5-square','6-trend up','7-trend down','8-trend random'};
 % seed = 2; % for random number generation
+maxEpoch = [300 500];
 
 %%
-for seed = 3 : 50
+for seed = 10 : 19
     sensor = mvad2(readRoot, saveRoot, sensorNum, dateStart, dateEnd, ...
-                   sensorTrainRatio, sensorPSize, step, [], seed);
+                   sensorTrainRatio, sensorPSize, step, [], seed, maxEpoch);
 end
 

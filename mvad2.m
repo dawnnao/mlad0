@@ -232,7 +232,7 @@ end
 
 %% 2 manually make training set
 if ismember(2, step) || isempty(step)
-dirName.trainSetByType = [GetFullPath(dirName.home) '/trainingSetByType/'];
+dirName.trainSetByType = [GetFullPath(dirName.home) sprintf('/trainingSetByType_autoenc1epoch_%d_globalEpoch_%d/', maxEpoch(1), maxEpoch(2))];
 if exist(dirName.trainSetByType,'dir')
     check = ls(dirName.trainSetByType);
     if ispc, check(1:4) = []; end
@@ -266,7 +266,7 @@ t(2) = tic;
 goNext = 0;
 while goNext == 0
     for g = 1 : groupTotal % ingore group in mvad2.m
-        labelTemp = load('C:\Users\Owner\Documents\GitHub\mlad\trainingSet_justLabel_inSensorCell_drift_modified2.mat'); % label2012
+        labelTemp = load('C:\Users\Owner\Documents\GitHub\adi\trainingSet_justLabel_inSensorCell_latest.mat'); % label2012
         label2012.bySensor = labelTemp.sensor.label.manual;
         clear labelTemp;
         
@@ -277,7 +277,7 @@ while goNext == 0
         end
         
         % count labels by type
-        for s = sensor.num{g}
+        for s = 1:38%sensor.num{g}
             for n = 1 : labelTotal
                 labelByType = find(label2012.bySensor{s} == n)';
                 labelByType = [s*ones(size(labelByType)) labelByType];
@@ -299,9 +299,9 @@ while goNext == 0
         % extra numbers will add to the previous type
         for n = 1 : labelTotal
             nn = labelTotal+1 - n;
-            if label2012.trainNum(nn) > size(label2012.byType{nn}, 1)
-                diffe(nn) = label2012.trainNum(nn) - size(label2012.byType{nn}, 1);
-                label2012.trainNum(nn) = size(label2012.byType{nn}, 1);
+            if label2012.trainNum(nn) > (size(label2012.byType{nn}, 1) - 33)
+                diffe(nn) = label2012.trainNum(nn) - size(label2012.byType{nn}, 1) + 33;
+                label2012.trainNum(nn) = size(label2012.byType{nn}, 1) - 33;
                 label2012.trainNum(nn-1) = label2012.trainNum(nn-1) + diffe(nn);
             end
         end
@@ -410,6 +410,7 @@ if ~isempty(step) && step(1) == 3
     end
     newP{2,1} = sensor.pSize;
     newP{3,1} = step;
+%     dirName.trainSetByType = [GetFullPath(dirName.home) sprintf('/trainingSetByType_autoenc1epoch_%d_globalEpoch_%d/', maxEpoch(1), maxEpoch(2))];
     dirName.trainSetByType = [GetFullPath(dirName.home) '/trainingSetByType/'];
     
     for g = 1 : groupTotal
@@ -537,15 +538,16 @@ for g = 1 : groupTotal
         temp.jFrame.dispose();
         % print to file
         set(temp.hFig, 'PaperPositionMode', 'auto');
-        saveas(temp.hFig, [dirName.net sprintf('/group-%d_netArchitecture.png', g)]);
+        saveas(temp.hFig, [dirName.net sprintf('/group-%d_netArchitecture.emf', g)]);
         % close figure
         close(temp.hFig)
         
         figure
         plotperform(sensor.trainRecord{s});
         box on
+        ylabel('Cross-Entropy');
         set(gca, 'fontsize',11, 'fontname', 'Times New Roman', 'fontweight', 'bold');
-        saveas(gcf,[dirName.net sprintf('/group-%d_netPerform.png', g)]);
+        saveas(gcf,[dirName.net sprintf('/group-%d_netPerform.emf', g)]);
         close
         
         figure
@@ -563,7 +565,7 @@ for g = 1 : groupTotal
         ax_width = outerpos(3) - ti(1) - ti(3);
         ax_height = outerpos(4) - ti(2) - ti(4) - 0.03;
         ax.Position = [left bottom ax_width ax_height];
-        saveas(gcf,[dirName.net sprintf('/group-%d_netConfuseTrain.png', g)]);
+        saveas(gcf,[dirName.net sprintf('/group-%d_netConfuseTrain.emf', g)]);
         close
         
         figure
@@ -581,7 +583,7 @@ for g = 1 : groupTotal
         ax_width = outerpos(3) - ti(1) - ti(3);
         ax_height = outerpos(4) - ti(2) - ti(4) - 0.03;
         ax.Position = [left bottom ax_width ax_height];
-        saveas(gcf,[dirName.net sprintf('/group-%d_netConfuseVali.png', g)]);
+        saveas(gcf,[dirName.net sprintf('/group-%d_netConfuseVali.emf', g)]);
         close
         clear h jpanel
         temp = rmfield(temp, {'jFrame', 'hFig'});
@@ -742,8 +744,11 @@ hourTotal = (date.serial.end-date.serial.start+1)*24;
 
 % reportCover; % make report cover!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+dirName.plot = [dirName.home sprintf('/plot__autoenc1epoch_%d_globalEpoch_%d', maxEpoch(1), maxEpoch(2))];
+if ~exist(dirName.plot, 'dir'), mkdir(dirName.plot); end
+
 % plot panorama
-dirName.plotPano = [dirName.home '/plot/panorama'];
+dirName.plotPano = [dirName.plot '/panorama'];
 if ~exist(dirName.plotPano, 'dir'), mkdir(dirName.plotPano); end
 for s = sensor.numVec
     if mod(s,2) == 1
@@ -783,7 +788,7 @@ imwrite(panopano, [dirName.plotPano '/' dirName.panopano]);
 clear height width p n
 
 % plot monthly stats per sensor
-dirName.plotSPS = [dirName.home '/plot/statsPerSensor'];
+dirName.plotSPS = [dirName.plot '/statsPerSensor'];
 if ~exist(dirName.plotSPS, 'dir'), mkdir(dirName.plotSPS); end
 for s = sensor.numVec
     for n = 1 : 12
@@ -804,7 +809,7 @@ end
 % reportStatsSensor;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 % plot anomaly space-time distribution per class
-dirName.plotSPT = [dirName.home '/plot/statsPerType'];
+dirName.plotSPT = [dirName.plot '/statsPerType'];
 if ~exist(dirName.plotSPT, 'dir'), mkdir(dirName.plotSPT); end
 for l = 1 : labelTotal
    for s = sensor.numVec
@@ -827,7 +832,7 @@ end
 % reportStatsLabel;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 % plot sensor-type bar stats
-dirName.plotSum = [dirName.home '/plot/statsSumUp'];
+dirName.plotSum = [dirName.plot '/statsSumUp'];
 if ~exist(dirName.plotSum, 'dir'), mkdir(dirName.plotSum); end
 for s = sensor.numVec
    for l = 1 : labelTotal
@@ -917,11 +922,11 @@ labelNet = sensorLabelNetSerial';
 labelNet = ind2vec(labelNet);
 
 fprintf('\nLoading actual labels of 2012...\n')
-load('C:\Users\Owner\Documents\GitHub\mlad\trainingSet_justLabel_inSensorCell_drift_modified2.mat')
+sensorTemp = load('C:\Users\Owner\Documents\GitHub\adi\trainingSet_justLabel_inSensorCell_latest.mat');
 
 labelMan = [];
 for mTemp = 1 : 38
-    labelMan = cat(1, labelMan, sensor.label.manual{mTemp}');
+    labelMan = cat(1, labelMan, sensorTemp.sensor.label.manual{mTemp}');
 end
 labelMan = ind2vec(labelMan');
 
@@ -940,9 +945,9 @@ bottom = outerpos(2) + ti(2) + 0.03;
 ax_width = outerpos(3) - ti(1) - ti(3);
 ax_height = outerpos(4) - ti(2) - ti(4) - 0.03;
 ax.Position = [left bottom ax_width ax_height];
-dirName.plotConfusionMatrix2012 = [dirName.home '/plot/confusionMatrix2012/'];
+dirName.plotConfusionMatrix2012 = [dirName.plot '/confusionMatrix2012/'];
 if ~exist(dirName.plotConfusionMatrix2012, 'dir'), mkdir(dirName.plotConfusionMatrix2012); end
-saveas(gcf, [dirName.plotConfusionMatrix2012 sprintf('comfusionMatrix_2012_') datestr(now,'yyyy-mm-dd_HH-MM-SS') sprintf('.png')]);
+saveas(gcf, [dirName.plotConfusionMatrix2012 sprintf('comfusionMatrix_2012_') datestr(now,'yyyy-mm-dd_HH-MM-SS') sprintf('.emf')]);
 close
 
 %%
