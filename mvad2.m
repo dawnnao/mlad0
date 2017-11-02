@@ -546,6 +546,7 @@ for g = 1 : groupTotal
         plotperform(sensor.trainRecord{s});
         box on
         ylabel('Cross-Entropy');
+        set(gca, 'YScale', 'log');
         set(gca, 'fontsize',11, 'fontname', 'Times New Roman', 'fontweight', 'bold');
         saveas(gcf,[dirName.net sprintf('/group-%d_netPerform.emf', g)]);
         close
